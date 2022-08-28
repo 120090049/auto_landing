@@ -3,7 +3,7 @@
 #include <iostream>
 int main(int argc, char** argv)
 {
-  // generate marker
+  // generate marker yeee
   std::cout << "hai";
   cv::Mat markerImage; 
   cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_250);
