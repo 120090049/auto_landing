@@ -1,0 +1,4 @@
+roslaunch auto_landing launch_my_world.launch
+rosrun auto_landing px4_controller.py
+roslaunch auto_landing launch_arco_det.launch
+roslaunch auto_landing pose_control.launch

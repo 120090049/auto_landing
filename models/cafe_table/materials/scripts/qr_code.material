@@ -1,0 +1,17 @@
+material Cube/logo_ground
+{
+  receive_shadows off
+  technique
+  {
+    pass
+    {
+      ambient 0.1 0.1 0.1 1.000000
+
+      texture_unit
+      {
+        texture qrcode.png
+      }
+    }
+  }
+}
+  

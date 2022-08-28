@@ -1,0 +1,14 @@
+wind_motor:
+  # Publish all joint states -----------------------------------
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    joint: base_motor_joint
+    publish_rate: 50  
+  
+  # Position Controllers ---------------------------------------
+  joint1_p_controller:
+    type: position_controllers/JointPositionController
+    joint: base_motor_joint
+  joint2_v_controller:
+    type: velocity_controllers/JointVelocityController
+    joint: motor_blade_joint

@@ -1,0 +1,191 @@
+<?xml version="1.0"?>
+<!-- Revolute-Revolute Manipulator -->
+<robot name="wind_motor" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+
+    <!-- Used for fixing robot to Gazebo 'base_link' -->
+  <link name="world"/>
+
+  <joint name="fixed" type="fixed">
+    <parent link="world"/>
+    <child link="base"/>
+  </joint>
+  
+  <link
+    name="base">
+    <inertial>
+      <origin
+        xyz="-2.14568092072379E-17 1.30544976890609E-16 2.13203167667941"
+        rpy="0 0 0" />
+      <mass
+        value="239.677339530121" />
+      <inertia
+        ixx="474.448729803715"
+        ixy="1.66613829580168E-31"
+        ixz="2.78459691258468E-15"
+        iyy="474.448729803715"
+        iyz="-2.89313833509779E-14"
+        izz="1.94777860949633" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://wind_motor/meshes/base.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://wind_motor/meshes/base.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="motor">
+    <inertial>
+      <origin
+        xyz="0.29942116032099 -0.00599879277100111 0.0461396154528784"
+        rpy="0 0 0" />
+      <mass
+        value="99.8670347776248" />
+      <inertia
+        ixx="4.18133141379384"
+        ixy="0.00979875000858408"
+        ixz="-0.0753930679226918"
+        iyy="4.2567036776393"
+        iyz="0.233541981123551"
+        izz="2.49068723631113" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://wind_motor/meshes/motor.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://wind_motor/meshes/motor.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="base_motor_joint"
+    type="continuous">
+    <origin
+      xyz="0 0 5"
+      rpy="0.1749 -1.5708 0" />
+    <parent
+      link="base" />
+    <child
+      link="motor" />
+    <axis
+      xyz="1 0 0" />
+  </joint>
+  <link
+    name="blade">
+    <inertial>
+      <origin
+        xyz="0.0290813022137693 0.0527789294376535 -0.463561081702721"
+        rpy="0 0 0" />
+      <mass
+        value="196.900961194299" />
+      <inertia
+        ixx="35.0204740805195"
+        ixy="0.234296378698889"
+        ixz="-2.06259594568107"
+        iyy="35.3158108443268"
+        iyz="-3.74350480835618"
+        izz="67.7652351214242" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://wind_motor/meshes/blade.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://wind_motor/meshes/blade.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="motor_blade_joint"
+    type="continuous">
+    <origin
+      xyz="0.3048 0 0"
+      rpy="0 0 0.50361" />
+    <parent
+      link="motor" />
+    <child
+      link="blade" />
+    <axis
+      xyz="0.062217 0.11292 -0.99165" />
+  </joint>
+
+  <transmission name="base2motor">
+   <type>transmission_interface/SimpleTransmission</type>
+    <joint name="base_motor_joint">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="base_motor_joint_motor">
+      <!-- <mechanicalReduction>1</mechanicalReduction> -->
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </actuator>
+  </transmission>
+
+  <transmission name="motor2blade">
+   <type>transmission_interface/SimpleTransmission</type>
+    <joint name="motor_blade_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_blade_joint_motor">
+      <!-- <mechanicalReduction>50</mechanicalReduction> -->
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </actuator>
+  </transmission>
+
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/wind_motor</robotNamespace>
+    </plugin>
+  </gazebo>
+  
+</robot>
