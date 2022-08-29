@@ -32,12 +32,17 @@
   <build_depend>roscpp</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>std_msgs</build_depend>
+  <!-- <build_depend>：用于声明构建依赖项，通俗来讲就是find_packages{...}包含的那些功能包，这些功能包用于：将catkin官方静态库对项目文件相关内容进行替换链接使之称为符合C++标准的项目文件（仅以C++编程为例）； -->
+
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
   <build_export_depend>std_msgs</build_export_depend>
+  <!-- <build_export_depend>：用于构建库文件，我们前面提到过库文件就是我们自定义类类型.h和.cpp文件的集合（一个库文件包含一对.h和.cpp文件），我们使用<build_export_depend>package_name<build_export_depend>关键字给catkin编译器指出“将我的自定义文件编译成符合C++标准的文件需要XXX功能包”，这些导出的头文件一般存放在./devel/include文件夹下； -->
+
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
+<!-- <exec_depend>：这些功能包（二进制共享库）用于将catkin官方提供的二进制共享库链接进编译好的一个一个的二进制.o目标文件之中使之称为可执行文件。 -->
 
 
   <build_depend>message_generation</build_depend>
@@ -50,3 +55,6 @@
 
   </export>
 </package>
+
+
+
