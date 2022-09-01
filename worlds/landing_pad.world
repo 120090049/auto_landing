@@ -15,12 +15,12 @@
 	      <pose> 0 0 0.01 0 0 0</pose>
       </include>
     </model>
-    <model name='wind_motor'>
+    <!-- <model name='wind_motor'>
       <include>
         <uri>model://wind_motor</uri>
 	      <pose> -10 -10 0 0 0 0</pose>
       </include>
-    </model>
+    </model> -->
     <!-- <model name='my_landing_pad'>
       <include>
         <uri>model://my_landing_pad</uri>

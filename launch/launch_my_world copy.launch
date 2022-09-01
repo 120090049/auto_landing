@@ -24,6 +24,15 @@
         <param name="camera_info" type="string" value="$(find prometheus_gazebo)/config/camera_config/camera_param_gazebo_monocular.yaml" />
     </node> -->
 
+	  <!-- Load the URDF into the ROS Parameter Server -->
+	<param name="robot_description"
+		command="$(find xacro)/xacro --inorder '$(find auto_landing)/models/wind_motor/urdf/wind_motor.xacro'" />
 
+	<!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
+	<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+		args="-urdf -model wind_motor -param robot_description"/>
+	
+	<!-- ros_control launch file -->
+	<include file="$(find auto_landing)/models/wind_motor/launch/wind_motor_control.launch" />
 
 </launch>

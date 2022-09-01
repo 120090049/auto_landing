@@ -7,7 +7,7 @@
     <arg name="P" default="0"/>
     <arg name="Y" default="0"/>
 
-    <arg name="world" default="$(find simulation)/worlds/classroom.world" />
+    <arg name="world" default="$(find auto_landing)/worlds/landing_pad.world" />
     <arg name="px4_config" default="$(find simulation)/resource/px4_config.yaml" />
     <arg name="gui" default="true"/>
     <arg name="ns" default="/"/>
@@ -43,7 +43,7 @@
     </group>
 
     <!-- Launch Gazebo -->
-    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <include file="$(find auto_landing)/launch/empty_world.launch">
         <arg name="gui" value="$(arg gui)"/>
         <arg name="world_name" value="$(arg world)" />
     </include>
