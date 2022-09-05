@@ -15,7 +15,7 @@ int main(int argc, char** argv)
     int b = 11;
     clp.push_back(b);
     clp.push_back(a);
-    cout << clp[0];
+    cout << clp[1];
     
 
 
