@@ -32,6 +32,7 @@ find_package(catkin REQUIRED COMPONENTS
     actionlib
     tf2_eigen
     tf
+    prometheus_msgs
 )
 
 # 指明系统依赖项,使用boost之类的库
@@ -98,6 +99,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
+  include ${catkin_INCLUDE_DIRS}
   src/lib #相对路径
   include
   ${catkin_INCLUDE_DIRS} # catkin_INCLUDE_DIRS目录下存储着着由catkin功能包编译而成的.h文件，因此以“catkin功能包名称+_INCLUDE_DIRS”组成。
@@ -137,7 +139,17 @@ add_executable(test_for_marker
 target_link_libraries(test_for_marker ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBS} yaml-cpp)
 
 
+add_executable(test_a
+    src/test.cpp
+)
+target_link_libraries(test_a ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBS} yaml-cpp)
 # add_executable(landpad_det
 #     src/landpad_det.cpp
 # )
 # target_link_libraries(landpad_det ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBS} yaml-cpp)
+
+add_executable(landpad_det
+  src/landpad_det.cpp
+)
+add_dependencies(landpad_det ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(landpad_det  ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBS} yaml-cpp)

@@ -1,0 +1,22 @@
+<launch>
+	<!-- Launch Gazebo Simulation -->
+	<arg name="x" default="10.0"/>
+    <arg name="y" default="10.0"/>
+    <arg name="z" default="0.05"/>
+	<arg name="world" default="$(find auto_landing)/worlds/landing_pad.world"/>
+	<arg name="sdf" default="$(find prometheus_gazebo)/amov_models/p450_monocular/p450_monocular.sdf"/>
+	<arg name="model" default="p450_monocular"/>
+
+	<include file="$(find auto_landing)/models/wind_motor/launch/wind_motor.launch"/>
+
+    <include file="$(find auto_landing)/launch/iris_px4.launch">
+	  <arg name="world" value="$(arg world)"/>
+	  <arg name="sdf" value="$(arg sdf)"/>
+	  <arg name="model" value="$(arg model)"/>
+      <arg name="x" value="$(arg x)"/>
+      <arg name="y" value="$(arg y)"/>
+      <arg name="z" value="$(arg z)"/>
+	</include>
+
+
+</launch>

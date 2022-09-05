@@ -10,9 +10,13 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-    cv::Mat cameraMatrix, distCoeffs;
-
-
+    std::vector<int> clp;
+    int a = 10;
+    int b = 11;
+    clp.push_back(b);
+    clp.push_back(a);
+    cout << clp[0];
+    
 
 
 

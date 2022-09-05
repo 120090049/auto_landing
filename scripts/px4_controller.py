@@ -52,7 +52,7 @@ CTRL-C to quit
 
 # COM_FLTMODE1 = Position
 # RC_CHAN_CNT = 8
-# RC_MAP_FLTMODE = Channel 5
+# RC_MAP_FLTMODE = Channel 5g
 # RC_MAP_PITCH = Channel 3
 # RC_MAP_ROLL= Channel 1
 # RC_MAP_THROTTLE = Channel 2
@@ -61,7 +61,7 @@ CTRL-C to quit
 # com_flightmode1 = position #个人推测： chane
 
 throttle_middle = 1750
-speed_control = 1600
+speed_control = 1750
 cur_target_rc_yaw = OverrideRCIn()
 mavros_state = State()
 armServer = rospy.ServiceProxy('/mavros/cmd/arming', CommandBool)
