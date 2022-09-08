@@ -12,7 +12,7 @@
     <arg name="gui" default="true"/>
     <arg name="ns" default="/"/>
     <!-- <arg name="model" default="iris"/> -->
-  	<arg name="sdf" default="$(find prometheus_gazebo)/amov_models/p450_monocular/p450_monocular.sdf"/>
+  	<arg name="sdf" default="$(find auto_landing)/models/p450_monocular/p450_monocular.sdf"/>
 
    	<arg name="model" default="p450"/>
 

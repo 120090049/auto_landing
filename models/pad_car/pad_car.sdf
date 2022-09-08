@@ -217,7 +217,7 @@
         <pose frame=''>0 0 0.173 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.26 0.26 .01</size>
+            <size>0.5 0.5 .01</size>
           </box>
         </geometry>
         <material>
@@ -237,7 +237,7 @@
         </geometry>
         <material>
           <script>
-            <name>Gazebo/White</name>
+            <name>Gazebo/Black</name>
             <uri>file://media/materials/scripts/gazebo.material</uri>
           </script>
         </material>

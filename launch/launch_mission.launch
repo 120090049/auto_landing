@@ -10,7 +10,6 @@
     	<arg name="z" value="$(arg z)"/>
     </include>
 
-	<!-- 启动Prometheus代码 -->
 	<!-- run the px4_pos_estimator.cpp -->
 	<arg name="input_source" default="2"/>
 	<arg name="rate_hz" default="30"/>
@@ -23,15 +22,26 @@
 		<param name="offset_z" value="$(arg z)" />
 	</node>
 	
-	<node pkg="prometheus_control" type="px4_sender" name="px4_sender" output="screen">
-		<rosparam command="load" file="$(find prometheus_gazebo)/config/prometheus_control_config/px4_sender.yaml"/>
+	<!-- run the autonomous_landing.cpp -->
+	<node pkg="auto_landing" type="my_mission" name="mission" output="screen" launch-prefix="gnome-terminal --">
+		
+		<!-- 是否使用降落板绝对高度 -->
+		<!--<param name="use_pad_height" value="true" />
+		<param name="pad_height" value="0.99" />-->
+		<param name="desire_z" value="1.0" />
+
+		<!-- 相机安装偏差 -->
+		<param name="camera_offset_x" value="0.0" />
+		<param name="camera_offset_y" value="0.0" />
+		<param name="camera_offset_z" value="-0.1" />
+		<!-- 追踪控制参数 -->
+		<param name="kpx_land" value="0.5" />
+		<param name="kpy_land" value="0.5" />
+		<param name="kpz_land" value="0.12" />
+		<!--<param name="arm_height_to_ground" value="0.5" />
+		<param name="arm_distance_to_pad" value="0.6" />-->
+
 	</node>
 
-	<!-- run the ground_station.cpp -->
-	<node pkg="prometheus_station" type="ground_station" name="ground_station" output="screen" launch-prefix="gnome-terminal --tab --">	
-	</node>
-
-	<!-- run the ground_station_msg.cpp -->
-	<node pkg="prometheus_station" type="ground_station_msg" name="ground_station_msg" output="screen" launch-prefix="gnome-terminal --tab --">	
-	</node>
 </launch>
+

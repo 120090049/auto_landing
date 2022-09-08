@@ -4,7 +4,7 @@
     <arg name="y" default="0.0"/>
     <arg name="z" default="0.05"/>
 	<arg name="world" default="$(find auto_landing)/worlds/landing_pad.world"/>
-	<arg name="sdf" default="$(find prometheus_gazebo)/amov_models/p450_monocular/p450_monocular.sdf"/>
+	<arg name="sdf" default="$(find auto_landing)/models/p450_monocular/p450_monocular.sdf"/>
 	<arg name="model" default="p450_monocular"/>
 
 	<!-- <node name="pad_car_controller" pkg="auto_landing" type="pad_car_controller.py" output="screen" /> -->
