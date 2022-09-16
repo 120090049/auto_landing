@@ -137,16 +137,17 @@ add_executable(test_for_marker src/test_for_marker.cpp)
 target_link_libraries(test_for_marker ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBS} yaml-cpp)
 
 add_executable(test_a src/test.cpp)
+add_dependencies(test_a ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_a ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBS} yaml-cpp)
 
 add_executable(landpad_det src/landpad_det.cpp)
 add_dependencies(landpad_det ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(landpad_det  ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBS} yaml-cpp)
 
-add_executable(mission src/mission.cpp)
-add_dependencies(mission ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(mission ${catkin_LIBRARIES})
+# add_executable(mission src/mission.cpp)
+# add_dependencies(mission ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(mission ${catkin_LIBRARIES})
 
 add_executable(my_mission src/my_mission.cpp)
 add_dependencies(my_mission ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(my_mission ${catkin_LIBRARIES})
+target_link_libraries(my_mission ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBS} yaml-cpp)

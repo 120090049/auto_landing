@@ -9,30 +9,13 @@
     <include>
       <uri>model://ground_plane</uri>
     </include>
-    <model name='logo_ground'>
+    <model name='chess_board'>
       <include>
-        <uri>model://cuhk_logo_ground</uri>
+        <uri>model://chess_board</uri>
 	      <pose> 0 0 0.01 0 0 0</pose>
       </include>
     </model>
-    <!-- <model name='wind_motor'>
-      <include>
-        <uri>model://wind_motor</uri>
-	      <pose> -10 -10 0 0 0 0</pose>
-      </include>
-    </model> -->
-    <!-- <model name='my_landing_pad'>
-      <include>
-        <uri>model://my_landing_pad</uri>
-	      <pose> 2 2 0.01 0 0 -1.5707963 </pose>
-      </include>
-    </model> -->
-     <model name='pad_car'>
-      <include>
-        <uri>model://pad_car</uri>
-	      <pose> 1 1 0.01 0 0 -1.5707963 </pose>
-      </include>
-    </model>
+
     <physics name='default_physics' default='0' type='ode'>
       <gravity>0 0 -9.8066</gravity>
       <ode>

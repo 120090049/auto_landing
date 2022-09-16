@@ -2,3 +2,4 @@ roslaunch auto_landing launch_my_world.launch
 rosrun auto_landing px4_controller.py
 rosrun auto_landing landpad_det
 roslaunch auto_landing launch_mission.launch
+rosrun auto_landing pad_car_controller.py

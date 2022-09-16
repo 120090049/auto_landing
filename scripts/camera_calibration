@@ -1,0 +1,30 @@
+sudo apt-get install ros-melodic-camera-calibration
+
+rosrun camera_calibration cameracalibrator.py --size 6x6 --square 0.285 image:=/prometheus/sensor/monocular_down/image_raw camera:=/prometheus/sensor/monocular_down
+
+
+[image]
+
+width
+1280
+
+height
+720
+
+camera matrix
+374.203195 0.000000 639.658565
+0.000000 374.197062 359.992852
+0.000000 0.000000 1.000000
+
+distortion
+0.000071 -0.000018 0.000039 -0.000070 0.000000
+
+rectification
+1.000000 0.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 0.000000 1.000000
+
+projection
+374.240051 0.000000 639.413363 0.000000
+0.000000 374.299103 360.068089 0.000000
+0.000000 0.000000 1.000000 0.000000

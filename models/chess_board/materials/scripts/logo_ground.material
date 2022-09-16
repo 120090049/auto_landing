@@ -1,0 +1,15 @@
+material Cube/chess_board
+{
+  receive_shadows off
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture chess_board.png
+      }
+    }
+  }
+}
+  

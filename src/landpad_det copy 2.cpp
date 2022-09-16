@@ -315,16 +315,14 @@ int main(int argc, char **argv)
 
     cv::Mat camera_matrix, distortion_coefficients;
     // vector<double> camera = { 300.1548323619423, 0, 291.8582472145741,0, 647.384819351103, 391.254810476919,0, 0, 1 };
-    vector<double> camera = { 370.0, 0, 640, 0, 375, 360, 0, 0, 1 };
-    // vector<double> camera = { 300.0, 0, 0, 0, 375, 0, 640, 360, 1 };
+    vector<double> camera = { 300.1548323619423, 0, 291.8582472145741,0, 647.384819351103, 391.254810476919,0, 0, 1 };
     camera_matrix = Mat(camera);
     camera_matrix = camera_matrix.reshape(1,3);
-// cout << camera_matrix << endl;
-    // vector<double> dist = { 0.1961793476399528, -1.38146317350581, -0.002301820186177369, -0.001054637905895881, 2.458286937422959 };
-    vector<double> dist = { 0, 0, 0, 0, 0 };
+    cout << camera_matrix << endl;
+    vector<double> dist = { 0.1961793476399528, -1.38146317350581, -0.002301820186177369, -0.001054637905895881, 2.458286937422959 };
     distortion_coefficients = Mat(dist);
     distortion_coefficients = distortion_coefficients.reshape(1, 1);
-// cout << distortion_coefficients << endl;
+
     // ArUco Marker字典选择以及旋转向量和评议向量初始化
     Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(10);
 
@@ -339,7 +337,8 @@ int main(int argc, char **argv)
     ros::Rate loopRate_1Hz(1);
     //----------------------------------------主循环------------------------------------
     // const auto wait_duration = std::chrono::milliseconds(2000);
-    float last_A1_yaw = 0;
+    Eigen::Quaterniond last_q;
+    cv::Mat last_rotation_matrix;
     Vec3d last_rvec(0,0,0);
     while (ros::ok())
     {
@@ -459,20 +458,19 @@ int main(int argc, char **argv)
 
                         // cv::aruco::estimatePoseSingleMarkers(markerCornersONE, 0.6, cameraMatrix, distCoeffs, rvec, tvec);
                         aruco::estimatePoseSingleMarkers(markerCornersONE, landpad_det_len*0.666667, camera_matrix, distortion_coefficients, rvec, tvec);
-// if (rvec[0][0] > 0)
-// {
-//     aruco::drawAxis(img, camera_matrix, distortion_coefficients, rvec[0], tvec[0],landpad_det_len*0.666667*0.5f);
-//     cout << "+" << rvec[0] << endl;
-//     cv::imwrite("/home/clp/catkin_ws/src/auto_landing/file/+.jpg", img2);
-//     cout << "-------" << endl;
-// }
-// if (rvec[0][0] < 0)
-// {
-//     aruco::drawAxis(img, camera_matrix, distortion_coefficients, rvec[0], tvec[0],landpad_det_len*0.666667*0.5f);
-//     cout << "-" << rvec[0] << endl;
-//     cv::imwrite("/home/clp/catkin_ws/src/auto_landing/file/-.jpg", img2);
-//     cout << "-------" << endl;
-// }
+                        // if (rvec[0][0] > 0)
+                        // {
+                        //     aruco::drawAxis(img, camera_matrix, distortion_coefficients, rvec[0], tvec[0],landpad_det_len*0.666667*0.5f);
+                        //     cout << "+" << rvec[0] << endl;
+                            
+                        //     cout << "-------" << endl;
+                        // }
+                        // if (rvec[0][0] < 0)
+                        // {
+                        //     aruco::drawAxis(img, camera_matrix, distortion_coefficients, rvec[0], tvec[0],landpad_det_len*0.666667*0.5f);
+                        //     cout << "-" << rvec[0] << endl;
+                        //     cout << "-------" << endl;
+                        // }
                         aruco::drawAxis(img, camera_matrix, distortion_coefficients, rvec[0], tvec[0],landpad_det_len*0.666667*0.5f);
                         rvecs.push_back(rvec[0]);
                         tvecs.push_back(tvec[0]);
@@ -493,11 +491,12 @@ int main(int argc, char **argv)
                 Eigen::Quaterniond q;
                 cv::Mat rotation_matrix; // 旋转向量转旋转矩阵
                 Vec3d rvec_result;
+                float k = 0.3;
+// cout << 1 << endl;
                 if ( rvec_main.size() > 0) {
-                    // rvec_result[0] = k*rvec_main[0][0] + (1-k)*last_rvec[0];
-                    // rvec_result[1] = k*rvec_main[0][1] + (1-k)*last_rvec[1];
-                    // rvec_result[2] = k*rvec_main[0][2] + (1-k)*last_rvec[2];
-                    rvec_result = rvec_main[0];
+                    rvec_result[0] = k*rvec_main[0][0] + (1-k)*last_rvec[0];
+                    rvec_result[1] = k*rvec_main[0][1] + (1-k)*last_rvec[1];
+                    rvec_result[2] = k*rvec_main[0][2] + (1-k)*last_rvec[2];
                     last_rvec = rvec_result;
                 }
                 else {
@@ -508,7 +507,6 @@ int main(int argc, char **argv)
                 cv::cv2eigen(rotation_matrix, rotation_matrix_eigen);
                 q = Eigen::Quaterniond(rotation_matrix_eigen);
                 q.normalize();
-// cout << 1 << endl;
 /////////////////////////////
                 // float o_rx = 0;
                 // float o_ry = 0;
@@ -528,24 +526,8 @@ int main(int argc, char **argv)
                 // rotation_vec[0] = o_rx;
                 // rotation_vec[1] = o_ry;
                 // rotation_vec[2] = o_rz;
-// std::vector<double> id_to8_t(3);
-// if  ( rvec_main.size() > 0)
-// {
-//     cv::Vec3d unit_v;           
-//     unit_v[0] = 1.;
-//     unit_v[1] = 0.;
-//     unit_v[2] = 0.;
-//     cv::Mat unit_mat{unit_v};
-//     unit_mat.convertTo(unit_mat, CV_32FC1);
-//     cv::Mat out;
-//     rotation_matrix.convertTo(rotation_matrix, CV_32FC1);
-//     out = rotation_matrix * unit_mat;
-//     // cout << rvec_main[0] << endl;
-
-//     cout << out << endl;
-//     cout << "-----------------------------------" << endl;
-
-// }
+                cout << rvec_result << endl;
+                cout << "-----------------------------------" << endl;
 // cout << 2 << endl;
 /////////////////////////////////////////////////////////////////
 
@@ -637,7 +619,7 @@ int main(int argc, char **argv)
                 cv::Mat id_8_t{id_8_v};
                 id_8_t.convertTo(id_8_t, CV_32FC1);
 
-// cout << 3 << endl;
+
 
                 float o_qx = q.x();
                 float o_qy = q.y();
@@ -679,18 +661,7 @@ int main(int argc, char **argv)
 
                 Eigen::Vector3d eulerVec;
                 eulerVec(0) = (Theta_C2W.z) / 180 * CV_PI;
-                float A1_yaw;
-                // float k = 0.3;
-                A1_yaw = eulerVec(0);
-                // if (last_A1_yaw == 0){
-                //     A1_yaw = eulerVec(0);
-                //     last_A1_yaw = A1_yaw;
-                // }
-                // else{
-                //     A1_yaw = k*eulerVec(0) + (1-k)*last_A1_yaw;
-                // }
-
-                // std::cout << A1_yaw << endl;
+                double A1_yaw = eulerVec(0);
 
                 // 将解算后的位置发给控制端
                 pose_now.header.stamp = ros::Time::now();

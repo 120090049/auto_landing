@@ -67,10 +67,9 @@
       <collision name='base_footprint_fixed_joint_lump__plate_2_link_collision_3'>
         <pose frame=''>0 0 0.173 0 -0 0</pose>
         <geometry>
-          <cylinder>
-            <length>0.005</length>
-            <radius>0.13</radius>
-          </cylinder>
+          <box>
+            <size>0.6 0.6 .01</size>
+          </box>
         </geometry>
         <surface>
           <contact>
@@ -217,7 +216,7 @@
         <pose frame=''>0 0 0.173 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.5 0.5 .01</size>
+            <size>0.6 0.6 .01</size>
           </box>
         </geometry>
         <material>

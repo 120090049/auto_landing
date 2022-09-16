@@ -56,7 +56,7 @@ struct Detection_result
     // 标志位：   detected 用作标志位 ture代表识别到目标 false代表丢失目标
     prometheus_msgs::DetectionInfo Detection_info;      
     
-    // 目标在相机系位置
+    // // 目标在相机系位置
     Eigen::Vector3f pos_camera_frame;  
     
     // 目标在机体系位置
@@ -75,6 +75,8 @@ struct Detection_result
     Eigen::Vector3f att_enu_frame;
     
     // 目标识别标志位,阈值:VISION_THRES
+    float yaw_error;
+
     bool is_detected = false; 
     int num_lost = 0;          //视觉丢失计数器
     int num_regain = 0;     
