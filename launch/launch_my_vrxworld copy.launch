@@ -1,0 +1,42 @@
+<launch>
+	<!-- Launch Gazebo Simulation -->
+	<!-- the location of the USV = (-532, 162, 0.1) -> (-560, 184, 0.1)--> 
+
+	<arg name="x" default="-512.76"/>
+    <arg name="y" default="182,7"/>
+    <arg name="z" default="3.28"/>
+	<arg name="R" default="0"/>
+    <arg name="P" default="0"/>
+    <arg name="Y" default="0.24"/>
+	<arg name="world" default="$(find auto_landing)/worlds/my_vrx.world"/>
+	<arg name="sdf" default="$(find auto_landing)/models/p450_monocular/p450_monocular.sdf"/>
+	<arg name="model" default="p450_monocular"/>
+
+	<!-- <node name="pad_car_controller" pkg="auto_landing" type="pad_car_controller.py" output="screen" /> -->
+
+	<include file="$(find auto_landing)/launch/vrx/launch_vrx.launch">
+	  <arg name="world" value="$(arg world)"/>
+	</include>
+
+
+    <include file="$(find auto_landing)/launch/vrx/iris_px4_for_vrx.launch">
+	  <arg name="sdf" value="$(arg sdf)"/>
+	  <arg name="model" value="$(arg model)"/>
+      <arg name="x" value="$(arg x)"/>
+      <arg name="y" value="$(arg y)"/>
+      <arg name="z" value="$(arg z)"/>
+	  <arg name="R" value="$(arg R)"/>
+   	  <arg name="P" value="$(arg P)"/>
+      <arg name="Y" value="$(arg Y)"/>
+	</include>
+
+
+	<!-- run the landpad_det.cpp -->
+    <!-- <node pkg="prometheus_detection" type="my_landpad_det" name="landpad_det" output="screen">
+        <param name="camera_topic" type="string" value="/prometheus/sensor/monocular_down/image_raw" />
+        <param name="camera_info" type="string" value="$(find prometheus_gazebo)/config/camera_config/camera_param_gazebo_monocular.yaml" />
+    </node> -->
+
+
+
+</launch>

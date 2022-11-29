@@ -1,0 +1,1 @@
+rosrun xacro xacro my_vrx.world.xacro > my_vrx.world

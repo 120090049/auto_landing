@@ -65,3 +65,8 @@ roslaunch auto_landing launch_mission.launch
 
 rosrun auto_landing pad_car_controller.py
 可以让小车进行移动
+
+vrx
+https://github.com/osrf/vrx/wiki/vrx_api_tutorials
+roslaunch auto_landing launch_my_vrxworld.launch
+roslaunch vrx_gazebo usv_keydrive.launch
