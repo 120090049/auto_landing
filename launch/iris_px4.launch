@@ -8,7 +8,7 @@
     <arg name="Y" default="0"/>
 
     <arg name="world" default="$(find auto_landing)/worlds/landing_pad.world" />
-    <arg name="px4_config" default="$(find simulation)/resource/px4_config.yaml" />
+    <arg name="px4_config" default="$(find auto_landing)/config/px4_config.yaml" />
     <arg name="gui" default="true"/>
     <arg name="ns" default="/"/>
     <!-- <arg name="model" default="iris"/> -->
