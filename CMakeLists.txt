@@ -82,7 +82,7 @@ find_package(OpenCV REQUIRED)
 ## 3. 指明编译构建C++源文件所需的功能包
 
 catkin_package(  
-#   INCLUDE_DIRS include  
+  INCLUDE_DIRS include  
 #   LIBRARIES xxx
   CATKIN_DEPENDS roscpp std_msgs message_runtime
 #   DEPENDS Boost  
@@ -151,3 +151,13 @@ target_link_libraries(landpad_det  ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${Open
 add_executable(my_mission src/my_mission.cpp)
 add_dependencies(my_mission ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(my_mission ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBS} yaml-cpp)
+
+
+add_library(OptiTrackFeedbackRigidBody src/lib/OptiTrackFeedBackRigidBody.cpp)
+add_library(KeyboardEvent src/lib/KeyboardEvent.cpp)
+
+##px4_pos_estimator.cpp
+add_executable(px4_pos_estimator src/px4/px4_pos_estimator.cpp)
+add_dependencies(px4_pos_estimator prometheus_control_gencpp)
+target_link_libraries(px4_pos_estimator ${catkin_LIBRARIES})
+target_link_libraries(px4_pos_estimator OptiTrackFeedbackRigidBody)
