@@ -68,9 +68,14 @@ armServer = rospy.ServiceProxy('/mavros/cmd/arming', CommandBool)
 setModeServer = rospy.ServiceProxy('/mavros/set_mode', SetMode)
 local_target_pub = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=100)
 
+
+
 def __init__():
 	rospy.init_node('px4_controller' ,anonymous=True)
 	rospy.Subscriber("/mavros/state", State, mavros_state_callback)
+	
+	rospy.Subscriber("/prometheus/sensor/monocular_down/image_raw", State, downlooking_camera_callback)
+	rospy.Subscriber("/prometheus/sensor/monocular_front/image_raw", State, frontlooking_camera_callback)
 	print("Initialized")
 
 def RCInOverride(channel0,channel1,channel2,channel3):
@@ -81,6 +86,12 @@ def RCInOverride(channel0,channel1,channel2,channel3):
 	target_RC_yaw.channels[3] = channel3
 	target_RC_yaw.channels[4] = 1100
 	return target_RC_yaw
+
+def downlooking_camera_callback(msg):
+	return
+
+def frontlooking_camera_callback(msg):
+	return
 
 def mavros_state_callback(msg):
 	global mavros_state
