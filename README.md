@@ -56,10 +56,40 @@ rosrun auto_landing pad_car_controller.py
 ```
 * Demo output
 * * tracing a circle
-`![tracing a cycle](https://github.com/120090049/auto_landing/blob/master/pic/circlegif.gif)`
+![](https://github.com/120090049/auto_landing/blob/master/pic/circlegif.gif)
+or you can see the video in [https://www.bilibili.com/video/BV1i841157xP/?spm_id_from=333.999.0.0&vd_source=ad381b5f9f387834b8c7d8816afa9ed5](bilibili)
+* * tracing a rectangle
+![](https://github.com/120090049/auto_landing/blob/master/pic/rectanglegif.gif)
+or you can see the video in [https://www.bilibili.com/video/BV1m44y1S7ko/?spm_id_from=333.999.0.0](bilibili)
+* * tracing the a car moving randomly  
+see [https://www.bilibili.com/video/BV1xd4y1s724/?spm_id_from=333.999.0.0](bilibili)
 
-
-vrx
-https://github.com/osrf/vrx/wiki/vrx_api_tutorials
+### Landing in VRX (the second stage, still in progress)
+To see the detailed planning, you may take a look at my [proposal](https://github.com/120090049/auto_landing/blob/master/file/proposal_lingpeng_chen.pdf).
+* How to run
+```
 roslaunch auto_landing launch_my_vrxworld.launch
 roslaunch vrx_gazebo usv_keydrive.launch
+rosrun auto_landing px4_controller_withcamera.py
+```
+* For the current progress 
+I am now working on the step one of the whole landing process. I plan to use HOG to extract the feature of the image and use SVM to detect.  
+ 
+This is the video for landing the UAV with manual control.  
+![](https://github.com/120090049/auto_landing/blob/master/pic/landinggif.gif)  
+
+Besides, I add the recording function to the UAV controller so that I can create some data set for the object detection.  
+![](https://github.com/120090049/auto_landing/blob/master/pic/record.jpg)
+
+### A Future plan
+My academic advisor Prof. Qian has suggested me to study the usage of UVA for the inspection of offshore turbines, which is a development trend of new energy in the near future. I plan to work on this direction in the future, say, when I am a senior.  
+Here is a rough environment I created.   
+![](https://github.com/120090049/auto_landing/blob/master/pic/windturbines.jpg)
+The turbine is designed and exported from solidworks.  
+To launch the environment and control the turbine, you may run
+```
+roslaunch auto_landing launch_my_wind_motor_world.launch
+rosrun auto_landing wind_motor_controller.py
+```
+
+
