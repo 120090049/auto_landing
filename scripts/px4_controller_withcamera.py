@@ -246,5 +246,4 @@ if __name__=="__main__":
 	print (msg)
 	controller = Controller()
 	controller.main_loop()
-	
 	termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
