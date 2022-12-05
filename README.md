@@ -55,6 +55,9 @@ roslaunch auto_landing launch_mission.launch
 rosrun auto_landing pad_car_controller.py
 ```
 * Demo output
+* * tracing a circle
+`![tracing a cycle](https://github.com/120090049/auto_landing/blob/master/pic/circlegif.gif)`
+
 
 vrx
 https://github.com/osrf/vrx/wiki/vrx_api_tutorials
