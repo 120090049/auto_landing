@@ -31,7 +31,7 @@ enter into vehicle setup -> parameters -> search and set as following
 ```
 
 * * config PID parameters
-set up simulation world  
+set up simulation world   
 `roslaunch auto_landing launch_my_world.launch `  
 run remote controller  
 `rosrun auto_landing px4_controller.py`  
