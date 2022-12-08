@@ -1,16 +1,3 @@
-/***************************************************************************************************************************
- * landpad_det.cpp
- * Author: Jario
- * Update Time: 2020.1.12
- *
- * 说明: 降落目标识别程序，降落板的尺寸为60cmX60cm
- *      1. 【订阅】图像话题 (默认来自web_cam)
- *         /prometheus/camera/rgb/image_raw
- *      2. 【发布】目标位置，发布话题见 Prometheus/Modules/msgs/msg/DetectionInfo.msg
- *         /prometheus/object_detection/landpad_det
- *      3. 【发布】检测结果的可视化图像话题
- *         /prometheus/camera/rgb/image_landpad_det
-***************************************************************************************************************************/
 
 #include <time.h>
 #include <fstream>
@@ -60,6 +47,15 @@ using namespace cv;
 double threshold_error=0.4;
 
 
+/***************************************************************************************************************************
+ * 说明: 降落目标识别程序，降落板的尺寸为60cmX60cm
+ *      1. 【订阅】图像话题 (默认来自web_cam)
+ *         /prometheus/camera/rgb/image_raw
+ *      2. 【发布】目标位置，发布话题见 Prometheus/Modules/msgs/msg/DetectionInfo.msg
+ *         /prometheus/object_detection/landpad_det
+ *      3. 【发布】检测结果的可视化图像话题
+ *         /prometheus/camera/rgb/image_landpad_det
+***************************************************************************************************************************/
 //---------------------------variables---------------------------------------
 //------------ROS TOPIC---------
 //【订阅】无人机位置
