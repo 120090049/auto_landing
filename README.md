@@ -30,7 +30,7 @@ enter into vehicle setup -> parameters -> search and set as following
     # channel_1: roll; channel_2: throttle; channel_3: pitch; channel_4: yaw; channel_5: flight mode;
 ```
 
-* * config PID parameters
+* * config PID parameters  
 set up simulation world   
 `roslaunch auto_landing launch_my_world.launch `  
 run remote controller  
