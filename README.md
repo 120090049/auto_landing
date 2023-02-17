@@ -67,7 +67,7 @@ see [https://www.bilibili.com/video/BV1xd4y1s724/?spm_id_from=333.999.0.0](bilib
 ### Landing in VRX (the second stage, still in progress)
 To see the detailed planning, you may take a look at my [proposal](https://github.com/120090049/auto_landing/blob/master/file/proposal_lingpeng_chen.pdf).  
 The structure of the launch file can be seen in [launch_my_vrxworld.launch](https://gitmind.cn/app/docs/ml4da866).  
-The guideline of changing the stuff in the vrxworld like wind boat can be be seen in the [link]([https://github.com/120090049/auto_landing/blob/master/file/proposal_lingpeng_chen.pdf](https://github.com/osrf/vrx/wiki/vrx_api_tutorials)).  
+The guideline of changing the stuff in the vrxworld like wind boat can be be seen in the [link](https://github.com/osrf/vrx/wiki/vrx_api_tutorials).  
 
 * How to run
 ```
