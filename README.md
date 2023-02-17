@@ -65,8 +65,8 @@ or you can see the video in [https://www.bilibili.com/video/BV1m44y1S7ko/?spm_id
 see [https://www.bilibili.com/video/BV1xd4y1s724/?spm_id_from=333.999.0.0](bilibili)
 
 ### Landing in VRX (the second stage, still in progress)
-To see the detailed planning, you may take a look at my [proposal](https://github.com/120090049/auto_landing/blob/master/file/proposal_lingpeng_chen.pdf).
-The structure of [launch_my_vrxworld.launch](https://gitmind.cn/app/docs/ml4da866).
+To see the detailed planning, you may take a look at my [proposal](https://github.com/120090049/auto_landing/blob/master/file/proposal_lingpeng_chen.pdf).  
+The structure of the launch file can be seen in [launch_my_vrxworld.launch](https://gitmind.cn/app/docs/ml4da866).  
 * How to run
 ```
 roslaunch auto_landing launch_my_vrxworld.launch
