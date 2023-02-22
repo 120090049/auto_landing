@@ -38,7 +38,10 @@
       <!--name可以定义，也可以不定义，它的默认值是_default_-->
         <camera name='__default__'>
           <!-- FOV,120度 -->
-          <horizontal_fov>2.0944</horizontal_fov><!--定义水平视野场，此处为120度-->
+          <!--定义水平视野场，此处为120度-->
+          <!-- <horizontal_fov>2.0944</horizontal_fov> -->
+          <!--定义水平视野场，此处为150度-->
+          <horizontal_fov>2.618</horizontal_fov>
           <!--image标签，功能是定义以像素为单位的图片大小和图片格式-->
           <image>
             <width>1280</width>
@@ -153,7 +156,8 @@
       <sensor name='camera' type='camera'>
         <camera name='__default__'>
           <!-- FOV,120度 -->
-          <horizontal_fov>2.0944</horizontal_fov>
+          <!-- <horizontal_fov>2.0944</horizontal_fov> -->
+          <horizontal_fov>2.618</horizontal_fov>
           <image>
             <width>1280</width>
             <height>720</height>

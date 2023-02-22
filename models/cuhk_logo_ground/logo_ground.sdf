@@ -36,7 +36,7 @@
         <cast_shadows>false</cast_shadows>
         <geometry>
           <box>
-            <size>100 100 .01</size>
+            <size>25 25 .01</size>
           </box>
         </geometry>
         <material>

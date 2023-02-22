@@ -12,8 +12,9 @@ from mavros_msgs.srv import CommandBool, CommandTOL, SetMode
 from geometry_msgs.msg import PoseStamped, Twist
 from sensor_msgs.msg import Imu, NavSatFix
 from std_msgs.msg import Float32, String
+from gazebo_msgs.msg import LinkStates
 
-import os
+import sys
 import rospy
 import cv2
 from cv_bridge import CvBridge, CvBridgeError
@@ -38,6 +39,8 @@ j and l : yaw control
 ---------------------------
 g : Speed reduction
 h : Speed increase
+q : front-looking camera start/record/stop
+e : down-looking camera start/record/stop
 ---------------------------
 %%%%%%%%%%%%%%%%%%%%%%%
 command_cotrol
@@ -53,7 +56,8 @@ command_cotrol
 CTRL-C to quit
 
 """
-
+INIT_HEIGHT = 0
+PIC_VIDEO = False
 # COM_FLTMODE1 = Position
 # RC_CHAN_CNT = 8
 # RC_MAP_FLTMODE = Channel 5g
@@ -90,7 +94,8 @@ class Controller:
 	def __init__(self):
 		rospy.init_node('px4_controller' ,anonymous=True)
 		rospy.Subscriber("/mavros/state", State, self.mavros_state_callback)
-		
+		# rospy.Subscriber("/mavros/global_position/global", NavSatFix, self.mavros_pos_callback) # /gazebo/link_states
+		rospy.Subscriber("/gazebo/link_states", LinkStates, self.mavros_pos_callback)
 		rospy.Subscriber("/prometheus/sensor/monocular_down/image_raw", Image, self.downlooking_camera_callback)
 		rospy.Subscriber("/prometheus/sensor/monocular_front/image_raw", Image, self.frontlooking_camera_callback)
 		self.bridge = CvBridge()
@@ -99,6 +104,8 @@ class Controller:
 		self.speed_control = 1750
 		self.cur_target_rc_yaw = RCInOverride(1500,2000,1000,1500)
 		self.mavros_state = State()
+		self.gazebo_link_states = LinkStates()
+		self.height = 0
 		self.armServer = rospy.ServiceProxy('/mavros/cmd/arming', CommandBool)
 		self.setModeServer = rospy.ServiceProxy('/mavros/set_mode', SetMode)
 		self.local_target_pub = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=100)
@@ -106,9 +113,9 @@ class Controller:
 		self.swithch_front = 0
 		self.swithch_down = 0
 	
-		str = os.getcwd()
-		self.vw_down = cv2.VideoWriter(str+'/videos/down.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 10, (1280,720))
-		self.vw_front = cv2.VideoWriter(str+'/videos/front.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 10, (1280,720))
+		self.pwd = sys.path[0]
+		self.vw_down = cv2.VideoWriter(self.pwd+'/videos/down.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 10, (1280,720))
+		self.vw_front = cv2.VideoWriter(self.pwd+'/videos/front.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 10, (1280,720))
 		print("Initialized")
 
 	def downlooking_camera_callback(self, data): #e
@@ -118,9 +125,13 @@ class Controller:
 				cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
 			except CvBridgeError as e:
 				print(e)
-			if (self.swithch_down % 2 == 0):
-				self.vw_down.write(cv_image)
-				cv2.putText(cv_image,"RECORDING",(1050, 40),cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+			if (PIC_VIDEO):
+				if (self.key == 'q'):
+					cv2.imwrite(self.pwd + "/pics/down"+str(self.swithch_front)+".jpg", cv_image)
+			else:
+				if (self.swithch_down % 2 == 0):
+					self.vw_down.write(cv_image)
+					cv2.putText(cv_image,"RECORDING",(1050, 40),cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 			# 显示Opencv格式的图像
 			cv2.imshow("Image down", cv_image)
 			cv2.waitKey(3)
@@ -135,9 +146,13 @@ class Controller:
 				cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
 			except CvBridgeError as e:
 				print(e)
-			if (self.swithch_front % 2 == 0):
-				self.vw_front.write(cv_image)
-				cv2.putText(cv_image,"RECORDING",(1050, 40),cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+			if (PIC_VIDEO):
+				if (self.key == 'q'):
+					cv2.imwrite(self.pwd + "/pics/front"+str(self.swithch_front)+".jpg", cv_image)
+			else:
+				if (self.swithch_front % 2 == 0):
+					self.vw_front.write(cv_image)
+					cv2.putText(cv_image,"RECORDING",(1050, 40),cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 				
 			cv2.imshow("Image front", cv_image)
 			cv2.waitKey(3)
@@ -146,6 +161,18 @@ class Controller:
 
 	def mavros_state_callback(self, msg):
 		self.mavros_state = msg
+
+	def mavros_pos_callback(self, msg):
+		self.gazebo_link_states = msg
+		index = self.gazebo_link_states.name.index('p450_monocular::p450::base_link')
+		self.height = self.gazebo_link_states.pose[index].position.z
+		# global INIT_HEIGHT
+		# height = msg.altitude
+		# if (INIT_HEIGHT == 0):
+		# 	INIT_HEIGHT = height
+		# else:
+		# 	self.height = height - INIT_HEIGHT
+		
 
 	def command_control(self):
 		if self.key == 'e'or self.key == 'E':
@@ -237,12 +264,19 @@ class Controller:
 			self.command_control()
 			self.action_control()
 			self.local_target_pub.publish(self.cur_target_rc_yaw)
+			print(self.height)
 			if (controller.key == '\x03'):
 				break
 
 
 if __name__=="__main__":
 	settings = termios.tcgetattr(sys.stdin)
+	input = input("Do you want to record video or capture image? (0 for video and 1 for picture)")
+	if (input == 0):
+		PIC_VIDEO = False
+	elif (input == 1):
+		PIC_VIDEO = True
+
 	print (msg)
 	controller = Controller()
 	controller.main_loop()

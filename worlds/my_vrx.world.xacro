@@ -6,7 +6,8 @@
     <xacro:sydneyregatta />
     <!--Waves-->
     <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
-    <xacro:ocean_waves scale="2.5"/>
+    <xacro:ocean_waves/>
+    <!-- <"gain:=0.1 period:=5 direction_x:=1.0 direction_y:=0.0 angle:=0.4 scale:=1.5"> -->
 
     <!--Wind-->
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>

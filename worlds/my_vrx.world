@@ -96,8 +96,8 @@
           <model>PMS</model>
           <period>5</period>
           <number>3</number>
-          <scale>2.5</scale>
-          <gain>0.1</gain>
+          <scale>1.5</scale>
+          <gain>0.0</gain>
           <direction>1.0 0.0</direction>
           <angle>0.4</angle>
           <tau>2.0</tau>
@@ -117,8 +117,8 @@
               <model>PMS</model>
               <period>5</period>
               <number>3</number>
-              <scale>2.5</scale>
-              <gain>0.1</gain>
+              <scale>1.5</scale>
+              <gain>0.0</gain>
               <direction>1.0 0.0</direction>
               <angle>0.4</angle>
               <tau>2.0</tau>
@@ -129,7 +129,7 @@
           </plugin>
           <geometry>
             <mesh>
-              <scale>2.5 2.5 1</scale>
+              <scale>1.5 1.5 1</scale>
               <uri>model://ocean_waves/meshes/mesh.dae</uri>
             </mesh>
           </geometry>
@@ -146,7 +146,7 @@
           <!-- Offset to prevent rendering conflict -->
           <geometry>
             <mesh>
-              <scale>2.5 2.5 1</scale>
+              <scale>1.5 1.5 1</scale>
               <uri>model://ocean_waves/meshes/mesh_below.dae</uri>
             </mesh>
           </geometry>
@@ -160,6 +160,7 @@
         </visual>
       </link>
     </model>
+    <!-- <"gain:=0.1 period:=5 direction_x:=1.0 direction_y:=0.0 angle:=0.4 scale:=1.5"> -->
     <!--Gazebo Plugin for simulating WAM-V dynamics-->
     <plugin filename="libusv_gazebo_wind_plugin.so" name="wind">
       <!-- models to be effected by the wind -->
