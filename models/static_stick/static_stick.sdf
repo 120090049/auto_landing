@@ -1,0 +1,63 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="my_model">
+    <pose>0 0 0 0 0 0</pose>
+    <static>true</static>
+    <link name="stick">
+
+      <visual name="visual">
+        <geometry>
+          <cylinder>
+            <length>4.0</length>
+            <radius>0.05</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Black</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+        </material>
+      </visual>
+
+      <sensor name='camera' type='camera'>
+        <update_rate>30</update_rate>
+        <camera name='head'>
+          <pose frame=''>0 0 0 0 0 0</pose>
+          <horizontal_fov>1.39626</horizontal_fov>
+          <image>
+            <width>360</width>
+            <height>720</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.02</near>
+            <far>300</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <mean>0</mean>
+            <stddev>0.007</stddev>
+          </noise>
+        </camera>
+        <plugin name='gazebo_camera' filename='libgazebo_ros_camera.so'>
+          <alwaysOn>1</alwaysOn>
+          <updateRate>0.0</updateRate>
+          <cameraName>inspect_camera</cameraName>
+          <imageTopicName>inspect_camera</imageTopicName>
+          <cameraInfoTopicName>inspect_camera_info</cameraInfoTopicName>
+          <frameName>camera_link</frameName>
+          <hackBaseline>0.07</hackBaseline>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
+        </plugin>
+        <pose frame=''>2 0 1.5 0 0 3.14</pose>
+      </sensor>
+    </link>
+
+  </model>
+</sdf>
+
