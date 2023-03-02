@@ -1,5 +1,5 @@
 <sdf version='1.6'>
-  <model name='boat_invisible'>
+  <model name='boat'>
     <link name='base_link'>
       <pose>0 0 0 0 -0 0</pose>
       <inertial>

@@ -1,0 +1,75 @@
+<sdf version='1.6'>
+  <model name='bouy'>
+    <link name='base_link'>
+      <pose>0 0 0 0 -0 0</pose>
+
+      <inertial>
+        <pose >0 0 0.124229 0 -0 0</pose>
+        <mass>227</mass>
+        <inertia>
+          <ixx>181.42</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>408.203</iyy>
+          <iyz>0</iyz>
+          <izz>495.037</izz>
+        </inertia>
+      </inertial>
+
+      <collision name='bouy_collision'>
+        <pose >0 0 0 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.2</length>
+            <radius>0.2</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      
+      <visual name="bouy_visual">
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.2</radius>
+          </sphere>
+        </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Black</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+        </material>
+      </visual>
+
+    </link>
+  
+    
+    
+    <plugin name='usv_dynamics_wamv_dynamics_plugin' filename='libusv_gazebo_dynamics_plugin.so'>
+      <bodyName>base_link</bodyName>
+      <waterLevel>0</waterLevel>
+      <waterDensity>997.8</waterDensity>
+      <xDotU>0.0</xDotU>
+      <yDotV>0.0</yDotV>
+      <nDotR>0.0</nDotR>
+      <xU>51.3</xU>
+      <xUU>72.4</xUU>
+      <yV>40.0</yV>
+      <yVV>0.0</yVV>
+      <zW>500.0</zW>
+      <kP>50.0</kP>
+      <mQ>50.0</mQ>
+      <nR>400.0</nR>
+      <nRR>0.0</nRR>
+      <hullRadius>0.213</hullRadius>
+      <boatWidth>2.4</boatWidth>
+      <boatLength>4.9</boatLength>
+      <length_n>2</length_n>
+      <wave_model>ocean_waves</wave_model>
+    </plugin>
+
+   
+
+  </model>
+</sdf>
