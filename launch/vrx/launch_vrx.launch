@@ -53,7 +53,7 @@
   </include>
 
   <!-- Load robot model -->
-  <arg name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
+  <arg name="urdf" default="$(find auto_landing)/models/boat_vrx/wamv_gazebo.urdf.xacro"/>  
   <param name="$(arg namespace)/robot_description"
          command="$(find xacro)/xacro &#x002D;&#x002D;inorder '$(arg urdf)'
          thruster_config:=$(arg thrust_config)

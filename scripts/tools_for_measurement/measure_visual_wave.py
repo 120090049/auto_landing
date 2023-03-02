@@ -60,20 +60,21 @@ class Monitor:
         self.img = None
         self.img_bin = None
         self.pwd = sys.path[0]
+        self.tag = False
 
     def inspect_camera_callback(self, data):
         try:
             self.img = self.bridge.imgmsg_to_cv2(data, "bgr8")
+            self.tag = True
         except CvBridgeError as e:
             print(e)
 
     def main_loop(self):
         i = 0
-        r = rospy.Rate(1000)
         while (1):
             self.key = getKey()
             # 显示Opencv格式的图像
-            if self.img.any():
+            if self.tag:
                 lower = np.array([0, 0, 0])
                 upper = np.array([100, 200, 60])
             
@@ -100,7 +101,7 @@ class Monitor:
                 cv2.imwrite(self.pwd + "stick.jpg", self.img)
             if (self.key == '\x03' or i > 500):
                 break
-            r.sleep()
+            rospy.sleep(0.01)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
-
+# This program compare the movement of the physical wave and the visual wave by 
+# referring to wavegauge3 and the static stick beside it
 import rospy
 import sys
 import select
@@ -8,6 +9,7 @@ import rospy
 
 import cv2
 from cv_bridge import CvBridge, CvBridgeError
+import matplotlib.ticker as ticker
 
 from gazebo_msgs.msg import LinkStates
 from sensor_msgs.msg import Image
@@ -48,27 +50,28 @@ class Comparator():
     def physical_wave_callback(self, msg):
         self.gazebo_link_states = msg
         index = self.gazebo_link_states.name.index(
-            'wavegauge3::wavegauge::base_link')
+            'wavegauge100::wavegauge::base_link')
         self.physical_wave = self.gazebo_link_states.pose[index].position.z
     
     def visual_wave_callback(self, msg):
         visual_wave_pix = int(msg.data)
-        self.visual_wave = (150-visual_wave_pix)/150.0
+        self.visual_wave = (220-visual_wave_pix)/75.0
 
     def main_loop(self):
         i = 0
-        r = rospy.Rate(15)
+        # r = rospy.Rate(15)
 
         while(True):
+            sim_time = rospy.Time.now().to_sec()
             self.key = getKey()
             i += 1
-            t.append(i)
+            t.append(sim_time)
             phy.append(self.physical_wave)
             vis.append(self.visual_wave)
             print("physical_wave = ", self.physical_wave, " visual_wave = ", self.visual_wave)
-            if (self.key == '\x03' or i > 1000):
+            if (self.key == '\x03' or i > 500):
                 break
-            r.sleep()
+            rospy.sleep(0.01)
 
 if __name__ == "__main__":
     settings = termios.tcgetattr(sys.stdin)
@@ -77,8 +80,10 @@ if __name__ == "__main__":
     controller = Comparator()
     controller.main_loop()
 
-    plt.plot(t, vis, phy)
-
+    plt.plot(t, phy, label='physical_wave')
+    plt.plot(t, vis, label='visual_wave')
+    plt.legend()
+    plt.gca().xaxis.set_major_locator(ticker.MaxNLocator(nbins=10))
     plt.show()
 
     # ax = plt.axes(projection ="3d")  
