@@ -264,7 +264,7 @@ class Controller:
 			self.command_control()
 			self.action_control()
 			self.local_target_pub.publish(self.cur_target_rc_yaw)
-			print(self.height)
+			# print(self.height)
 			if (controller.key == '\x03'):
 				break
 

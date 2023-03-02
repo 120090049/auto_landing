@@ -55,28 +55,27 @@
     <xacro:ocean_waves gain="1.0" period="8.0"/>
 
     <!-- Models  -->
-    
-    <!-- <model name="a3_buoy">
-      <pose>0 1 4 0 0 0 </pose>
+    <!-- <model name="boat">
+      <pose>0 0 0 0 0 0 </pose>
       <include>
-        <uri>model://polyform_a3</uri>
+        <uri>model://boat</uri>
+      </include>
+    </model> -->
+
+    <!-- <model name="invisible_plate">
+      <pose>5 5 2 0 0 0 </pose>
+      <include>
+        <uri>model://invisible_plate</uri>
+      </include>
+    </model> -->
+
+    <model name="bouy">
+      <pose>0 0 0 0 0 0 </pose>
+      <include>
+        <uri>model://bouy</uri>
       </include>
     </model>
-    <model name="surmark46104">
-      <include>
-        <uri>model://surmark46104</uri>
-        <pose>0 -1 4 0 0 0 </pose>
-      </include>
-    </model> -->
 
-    <!-- <model name='static_stick1'>
-      <pose> 0 2 0 0 0 0 </pose>
-      <include>
-        <uri>model://static_stick</uri>
-      </include>
-    </model> -->
-
-    
     <model name="wavegauge">
       <pose>0 0 0 0 0 0 </pose>
       <include>

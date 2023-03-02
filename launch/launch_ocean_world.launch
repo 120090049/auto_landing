@@ -1,0 +1,48 @@
+<launch>
+	<!-- Launch Gazebo Simulation -->
+	<!-- the location of the USV -->
+
+	<arg name="x" default="10"/>
+    <arg name="y" default="5"/>
+    <arg name="z" default="10.1"/>
+	<arg name="R" default="0"/>
+    <arg name="P" default="0"/>
+    <arg name="Y" default="-2.5"/>
+	<!-- <arg name="world" default="$(find auto_landing)/worlds/ocean_buoys.world"/> -->
+	<arg name="sdf_UAV" default="$(find auto_landing)/models/p450_monocular/p450_monocular.sdf"/>
+	<arg name="model_UAV" default="p450_monocular"/>
+	<arg name="sdf_boat" default="$(find auto_landing)/models/boat/boat.sdf"/>
+	<arg name="model_boat" default="boat"/>
+
+	<!-- <node name="pad_car_controller" pkg="auto_landing" type="pad_car_controller.py" output="screen" /> -->
+
+	<include file="$(find gazebo_ros)/launch/empty_world.launch">
+		<arg name="world_name" default="$(find auto_landing)/worlds/ocean.world" />
+	</include>
+
+	<!-- Spawn WAMV model in Gazebo -->
+	<node name="spawn_model_USV" pkg="gazebo_ros" type="spawn_model" output="screen"
+		args="-sdf -file $(arg sdf_boat) -model $(arg model_boat) -x 0 -y 0 -z 0 -R 0 -P 0 -Y 0">
+	</node>
+
+    <include file="$(find auto_landing)/launch/vrx/iris_px4_for_vrx.launch">
+	  <arg name="sdf" value="$(arg sdf_UAV)"/>
+	  <arg name="model" value="$(arg model_UAV)"/>
+      <arg name="x" value="$(arg x)"/>
+      <arg name="y" value="$(arg y)"/>
+      <arg name="z" value="$(arg z)"/>
+	  <arg name="R" value="$(arg R)"/>
+   	  <arg name="P" value="$(arg P)"/>
+      <arg name="Y" value="$(arg Y)"/>
+	</include>
+
+
+	<!-- run the landpad_det.cpp -->
+    <!-- <node pkg="prometheus_detection" type="my_landpad_det" name="landpad_det" output="screen">
+        <param name="camera_topic" type="string" value="/prometheus/sensor/monocular_down/image_raw" />
+        <param name="camera_info" type="string" value="$(find prometheus_gazebo)/config/camera_config/camera_param_gazebo_monocular.yaml" />
+    </node> -->
+
+
+
+</launch>
