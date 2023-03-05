@@ -41,11 +41,11 @@
           <!--定义水平视野场，此处为120度-->
           <!-- <horizontal_fov>2.0944</horizontal_fov> -->
           <!--定义水平视野场，此处为150度-->
-          <horizontal_fov>2.618</horizontal_fov>
+          <horizontal_fov>2.0944</horizontal_fov>
           <!--image标签，功能是定义以像素为单位的图片大小和图片格式-->
           <image>
             <width>1280</width>
-            <height>720</height>
+            <height>1280</height>
           </image>
           <!--定义远、近剪裁面，不会渲染远、近剪裁平面之外的对象-->
           <clip>
@@ -97,9 +97,9 @@
             <!--相机本身的信息-->
             <CxPrime>640</CxPrime>
             <Cx>640</Cx>
-            <Cy>360</Cy>
+            <Cy>640</Cy>
             <hackBaseline>0</hackBaseline>
-            <focalLength>369.502083</focalLength>
+            <focalLength>370</focalLength>
             <distortionK1>0.0</distortionK1>
             <distortionK2>0.0</distortionK2>
             <distortionK3>0.0</distortionK3>

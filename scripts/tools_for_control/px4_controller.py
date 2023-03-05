@@ -12,6 +12,8 @@ from mavros_msgs.srv import CommandBool, CommandTOL, SetMode
 from geometry_msgs.msg import PoseStamped, Twist
 from sensor_msgs.msg import Imu, NavSatFix
 from std_msgs.msg import Float32, String
+from prometheus_msgs.msg import DetectionInfo
+
 import time
 import math
 
