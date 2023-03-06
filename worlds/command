@@ -1,3 +1,4 @@
 rosrun xacro xacro my_vrx.world.xacro > my_vrx.world
 ocean_buoys.world
 rosrun xacro xacro ocean_buoys.world.xacro > ocean_buoys.world
+rosrun xacro xacro ocean.world.xacro > ocean.world

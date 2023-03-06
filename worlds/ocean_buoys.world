@@ -133,59 +133,54 @@
         <uri>model://boat</uri>
       </include>
     </model> -->
-    <model name="invisible_plate">
+    <!-- <model name="invisible_plate">
       <pose>5 5 2 0 0 0 </pose>
       <include>
         <uri>model://invisible_plate</uri>
       </include>
-    </model>
-    <!-- <model name="bouy">
+    </model> -->
+    <model name="bouy">
       <pose>0 0 0 0 0 0 </pose>
       <include>
         <uri>model://bouy</uri>
       </include>
-    </model> -->
+    </model>
     <model name="wavegauge">
       <pose>0 0 0 0 0 0 </pose>
       <include>
         <uri>model://wavegauge</uri>
       </include>
     </model>
-    <!-- <model name="wavegauge1">
+    <model name="wavegauge1">
       <pose>10 0 0 0 0 0 </pose>
       <include>
         <uri>model://wavegauge</uri>
       </include>
     </model>
-
     <model name="wavegauge2">
       <pose>20 0 0 0 0 0 </pose>
       <include>
         <uri>model://wavegauge</uri>
       </include>
     </model>
-
     <model name="wavegauge3">
       <pose>30 0 0 0 0 0 </pose>
       <include>
         <uri>model://wavegauge</uri>
       </include>
     </model>
-
-    
     <model name="wavegauge4">
       <pose>40 0 0 0 0 0 </pose>
       <include>
         <uri>model://wavegauge</uri>
       </include>
     </model>
-
     <model name="wavegauge5">
       <pose>50 0 0 0 0 0 </pose>
       <include>
         <uri>model://wavegauge</uri>
       </include>
-    </model> -->
+    </model>
     <model name="wavegauge100">
       <pose>100 0 0 0 0 0 </pose>
       <include>

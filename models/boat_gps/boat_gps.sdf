@@ -1,0 +1,50 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="boat_gps">
+    <link name="link">
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.015</mass>
+        <inertia>
+          <ixx>1e-05</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1e-05</iyy>
+          <iyz>0</iyz>
+          <izz>1e-05</izz>
+        </inertia>
+      </inertial>
+      <visual name="visual">
+        <geometry>
+          <cylinder>
+            <radius>1</radius>
+            <length>2</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Black</name>
+          </script>
+        </material>
+      </visual>
+      <sensor type="gps" name="gps_sensor">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>10.0</updateRate>
+        <gps>
+          <horizontalPositionError>0.5</horizontalPositionError>
+          <verticalPositionError>0.5</verticalPositionError>
+          <velocityError>0.1</velocityError>
+          <referenceLatitude>37.7749</referenceLatitude>
+          <referenceLongitude>-122.4194</referenceLongitude>
+          <referenceAltitude>0</referenceAltitude>
+        </gps>
+        <plugin name="gazebo_ros_gps_plugin" filename="libgazebo_ros_gps.so">
+          <robotNamespace>/gps</robotNamespace>
+        </plugin>
+      </sensor>
+    </link>
+  </model>
+</sdf>
+
+

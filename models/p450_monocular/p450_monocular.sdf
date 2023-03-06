@@ -1,13 +1,12 @@
 <?xml version="1.0"?>
 <sdf version='1.6'>
-<!--模型名字-->
   <model name='p450_monocular'>
   <!--include标签，包含URI编写的资源，可用于嵌套模型-->
     <include>
       <uri>model://p450</uri> <!--uri编写的p450飞机-->
     </include>
 
-   <!-- 下视相机link -->
+    <!-- 下视相机link -->
     <link name='Monocular_down_link'>
       <pose>0 0 -0.1 0 1.5707963 0</pose> <!--位置-->
       <!--物理属性-->
@@ -156,8 +155,8 @@
       <sensor name='camera' type='camera'>
         <camera name='__default__'>
           <!-- FOV,120度 -->
-          <!-- <horizontal_fov>2.0944</horizontal_fov> -->
-          <horizontal_fov>2.618</horizontal_fov>
+          <horizontal_fov>2.0944</horizontal_fov>
+          <!-- <horizontal_fov>2.618</horizontal_fov> -->
           <image>
             <width>1280</width>
             <height>720</height>

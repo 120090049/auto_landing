@@ -284,7 +284,6 @@ int main(int argc, char **argv)
             if (message_print)
                 pub_message(message_pub, prometheus_msgs::Message::NORMAL, msg_node_name, "Waiting for image.");
             
-            // std::this_thread::sleep_for(wait_duration);
             ros::spinOnce();
             loopRate_1Hz.sleep();
         }

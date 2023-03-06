@@ -1,0 +1,47 @@
+<launch>
+	<arg name="x" default="0.0"/>
+    <arg name="y" default="0.0"/>
+    <arg name="z" default="0.05"/>
+	
+	<!-- TF transform -->
+	<include file="$(find prometheus_gazebo)/launch_basic/tf_transform.launch">
+		<arg name="x" value="$(arg x)"/>
+    	<arg name="y" value="$(arg y)"/>
+    	<arg name="z" value="$(arg z)"/>
+    </include>
+
+	<!-- run the px4_pos_estimator.cpp -->
+	<arg name="input_source" default="2"/>
+	<arg name="rate_hz" default="30"/>
+	<node pkg="auto_landing" type="px4_pos_estimator" name="px4_pos_estimator" output="screen">
+		<!-- 定位数据输入源 0 for vicon， 1 for 激光SLAM, 2 for gazebo ground truth, 3 for T265 -->
+		<param name="input_source" value="$(arg input_source)" />
+		<param name="rate_hz" value="$(arg rate_hz)" />
+		<param name="offset_x" value="$(arg x)" />
+		<param name="offset_y" value="$(arg y)" />
+		<param name="offset_z" value="$(arg z)" />
+	</node>
+	
+	<!-- run the autonomous_landing.cpp -->
+	<node pkg="auto_landing" type="my_ocean_mission" name="mission" output="screen" launch-prefix="gnome-terminal --">
+		
+		<!-- 是否使用降落板绝对高度 -->
+		<!--<param name="use_pad_height" value="true" />
+		<param name="pad_height" value="0.99" />-->
+		<param name="desire_z" value="1.8" />
+
+		<!-- 相机安装偏差 -->
+		<param name="camera_offset_x" value="0.0" />
+		<param name="camera_offset_y" value="0.0" />
+		<param name="camera_offset_z" value="-0.1" />
+		<!-- 追踪控制参数 -->
+		<param name="kpx_land" value="2.0" />
+		<param name="kpy_land" value="2.0" />
+		<param name="kpyaw_land" value="0.5" />
+		<!--<param name="arm_height_to_ground" value="0.5" />
+		<param name="arm_distance_to_pad" value="0.6" />-->
+
+	</node>
+
+</launch>
+

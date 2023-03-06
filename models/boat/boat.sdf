@@ -474,8 +474,7 @@
       <parent>base_link</parent>
     </joint>
     
-    
-    
+
     <plugin name='usv_dynamics_wamv_dynamics_plugin' filename='libusv_gazebo_dynamics_plugin.so'>
       <bodyName>base_link</bodyName>
       <waterLevel>0</waterLevel>

@@ -65,7 +65,7 @@
 
     <!-- x+ head of boat y+ left of the boat -->
     <model name="bouy">
-      <pose>4 1 0 0 0 0 </pose>
+      <pose>-4 -1 0 0 0 0 </pose>
       <include>
         <uri>model://bouy</uri>
       </include>

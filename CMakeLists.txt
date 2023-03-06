@@ -152,6 +152,10 @@ add_executable(my_mission src/my_mission.cpp)
 add_dependencies(my_mission ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(my_mission ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBS} yaml-cpp)
 
+add_executable(my_ocean_mission src/my_ocean_mission.cpp)
+add_dependencies(my_ocean_mission ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(my_ocean_mission ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBS} yaml-cpp)
+
 
 add_library(OptiTrackFeedbackRigidBody src/lib/OptiTrackFeedBackRigidBody.cpp)
 add_library(KeyboardEvent src/lib/KeyboardEvent.cpp)

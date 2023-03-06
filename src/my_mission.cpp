@@ -10,9 +10,12 @@
 #include <Eigen/Eigen>
 #include <geometry_msgs/PoseStamped.h>
 #include <tf/transform_datatypes.h>
+#include <sensor_msgs/NavSatFix.h>
 #include <fstream>
 #include <opencv2/opencv.hpp>
 #include <math.h>
+#include <gazebo_msgs/LinkStates.h>
+
 #include "mission_utils.h"
 #include "message_utils.h"
 
@@ -24,7 +27,7 @@ float pre_x, pre_y;
 bool Change_state;
 ofstream outFile;
 //parameters for basic control (before the uav starts tracking)
-float desire_z = 1; //期望高度
+float set_init_height; //初始高度
 float MoveTimeCnt = 0;
 float k = 0.2;
 Eigen::Vector3d temp_pos_drone;
@@ -45,6 +48,13 @@ float kp_land[2];         //控制参数 - 比例参数
 float kp_yaw;
 float present_yaw;
 
+float UAV_GPS[3];
+float USV_GPS[3];
+float BOUY_GPS_z;
+
+float init_height = 0.0; // initial height 对于无人机的高度控制很重要 
+				   // 比如如果是在10m的高度无人机开机，那么set_height to 5, 则要给飞控发送-5米的指令，反正就是要-10m（initial height的高度）
+
 //主状态
 enum
 {
@@ -53,6 +63,7 @@ enum
 	FLY,			//开始飞（检测开始）
 
 }FlyState = WAITING;//初始状态WAITING
+const char* FlyState_name[] = {"WAITING", "PREPARE", "FLY"};
 
 //识别状态
 enum 
@@ -62,10 +73,18 @@ enum
     LOST,
     // LANDING,
 }exec_state = WAITING_RESULT;
+const char* exec_state_name[] = {"WAITING_RESULT", "TRACKING", "LOST"};
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-// function before tracking
+// // GPS数据回调函数
+// Eigen::Vector3d current_gps;
+// void gps_cb(const sensor_msgs::NavSatFix::ConstPtr &msg)
+// {
+//     current_gps = { msg->latitude, msg->longitude, msg->altitude };
+	
+// }
+
 //接收来自飞控的当前飞机位置
 Eigen::Vector3d pos_drone;                     
 void pos_cb(const geometry_msgs::PoseStamped::ConstPtr &msg)
@@ -90,7 +109,7 @@ void send_pos_setpoint(const Eigen::Vector3d& pos_sp, float yaw_sp, bool posit)
     //Bit 1:x, bit 2:y, bit 3:z, bit 4:vx, bit 5:vy, bit 6:vz, bit 7:ax, bit 8:ay, bit 9:az, bit 10:is_force_sp, bit 11:yaw, bit 12:yaw_rate
     //Bit 10 should set to 0, means is not force sp
 	if (posit){
-		pos_setpoint.type_mask = 0b100111111000;  // 100 111 111 000  xyz + yaw
+		pos_setpoint.type_mask = 0b100111111000;  // 100 111 111 000  xyz + yaw 基本用不着
 
 		pos_setpoint.coordinate_frame = 1;
 
@@ -109,9 +128,8 @@ void send_pos_setpoint(const Eigen::Vector3d& pos_sp, float yaw_sp, bool posit)
 		
 		pos_setpoint.velocity.x = pos_sp[0];
 		pos_setpoint.velocity.y = pos_sp[1];
-		pos_setpoint.position.z = pos_sp[2];
-
-		pos_setpoint.yaw = yaw_sp;
+		pos_setpoint.position.z = pos_sp[2]-init_height; // 
+		pos_setpoint.yaw = present_yaw - yaw_sp;
 
 		setpoint_raw_local_pub.publish(pos_setpoint);
 	}
@@ -130,10 +148,7 @@ void landpad_det_cb(const prometheus_msgs::DetectionInfo::ConstPtr &msg)
     landpad_det.pos_body_frame[2] = - landpad_det.Detection_info.position[2] + camera_offset[2];
     // 机体系 -> 机体惯性系 (原点在机体的惯性系) (对无人机姿态进行解耦)
     landpad_det.pos_body_enu_frame = R_Body_to_ENU * landpad_det.pos_body_frame;
-	// cout << "(" << landpad_det.pos_body_frame[0] << ", " << landpad_det.pos_body_frame[1] << ")" << endl; 
- 
-    // std::cout << landpad_det.pos_body_enu_frame << std::endl;
-
+	
     // if(use_pad_height)
     // {
     //     //若已知降落板高度，则无需使用深度信息。
@@ -171,9 +186,10 @@ void landpad_det_cb(const prometheus_msgs::DetectionInfo::ConstPtr &msg)
 void drone_state_cb(const prometheus_msgs::DroneState::ConstPtr& msg) //无人机姿态
 {
     _DroneState = *msg;
+	// 得到姿态旋转矩阵
     R_Body_to_ENU = get_rotation_matrix(_DroneState.attitude[0], _DroneState.attitude[1], _DroneState.attitude[2]);
 	
-	// std::cout << R_Body_to_ENU << endl; 
+	// 计算偏航角
 	cv::Vec3d rotvec(_DroneState.attitude[0], _DroneState.attitude[1], _DroneState.attitude[2]);
 	cv::Mat rotation_matrix;
 	cv::Rodrigues(rotvec, rotation_matrix);
@@ -182,15 +198,27 @@ void drone_state_cb(const prometheus_msgs::DroneState::ConstPtr& msg) //无人�
 	float r21 = rotation_matrix.ptr<float>(1)[0];
 	float thetaz = atan2(r21, r11) / 3.1415 * 180;
 	present_yaw = thetaz / 180 * CV_PI;
-	// cout << rotvec << endl;
-	// cout << present_yaw << endl;
+
+}
+
+void linkStatesCallback(const gazebo_msgs::LinkStates::ConstPtr& msg)
+{
+    // Print the link states to the console
+    for (int i = 0; i < msg->name.size(); i++) {
+		if (0 == strcmp(msg->name[i].c_str(), "p450_monocular::p450::base_link") ) {
+			UAV_GPS[0] = msg->pose[i].position.x;
+			UAV_GPS[1] = msg->pose[i].position.y;
+			UAV_GPS[2] = msg->pose[i].position.z;
+		}
+		// float USV_GPS[3];
+		// float BOUY_GPS_z;
+    }
 }
 
 
 //主状态机更新
 void FlyState_update(void)
 {
-
 	switch(FlyState)
 	{
 		case WAITING:
@@ -213,18 +241,23 @@ void FlyState_update(void)
 				FlyState = PREPARE;
 				cout << "Start offboard mode!" << endl;
 			}
-			//cout << "WAITING" <<endl;
 			break;
-		case PREPARE:											//飞到目标高度	
-			pos_target[0] = temp_pos_drone[0];
-			pos_target[1] = temp_pos_drone[1];
-			pos_target[2] = desire_z;
-			send_pos_setpoint(pos_target, 0, 1);
-			MoveTimeCnt +=1;
-			if(MoveTimeCnt >= 100)
+
+		case PREPARE: //飞到目标高度	
+
+			if (init_height == 0.0) {
+				init_height = UAV_GPS[2] - pos_drone[2];
+				cout << UAV_GPS[2] << "  " << pos_drone[2] << endl;
+			}				
+			//这里的 pos_target其实是 vx,vy, z							
+			pos_target[0] = 0;
+			pos_target[1] = 0;
+			pos_target[2] = set_init_height;
+			send_pos_setpoint(pos_target, 0, 0);
+			if(UAV_GPS[2] >= set_init_height-0.5)
 			{
-				MoveTimeCnt = 0;
-				cout << "Ready for dection!" << endl;
+				cout << UAV_GPS[2] << ">=" <<  (set_init_height-0.5) << endl;
+				cout << "Ready for detection!" << endl;
 				FlyState = FLY;
 			}
 			if(current_state.mode != "OFFBOARD")				//如果在REST途中切换到onboard，则跳到WAITING
@@ -232,6 +265,7 @@ void FlyState_update(void)
 				FlyState = WAITING;
 				cout << "Change back to the original mode" << endl;
 			}
+			
 			break;
 		case FLY:
 			{
@@ -241,13 +275,22 @@ void FlyState_update(void)
 					// 初始状态，等待视觉检测结果
 					case WAITING_RESULT:
 					{
-						if(landpad_det.is_detected)
-						{
-							exec_state = TRACKING;
-							Change_state = true;
-							cout << "Get the detection result." <<endl;
-							break;
-						}
+
+						vel_target[0] = 0.4 ;
+                        vel_target[1] = 0.4;
+						vel_target[2] = set_init_height;
+
+						
+						send_pos_setpoint(vel_target, -1.0, 0);
+						// cout << "(" << vel_target[0] << ", " << vel_target[1] << ") and yaw = " << endl; 
+						// if(landpad_det.is_detected)
+						// {
+						// 	exec_state = TRACKING;
+						// 	Change_state = true;
+						// 	cout << "Get the detection result." <<endl;
+						// }
+
+						break;
 					}
 					// 追踪状态
 					case TRACKING:
@@ -261,15 +304,10 @@ void FlyState_update(void)
 						}   
 
 						// 机体系速度控制
-						// for (int i=0; i<3; i++)
-						// {
-						// 	vel_target[i] = kp_land[i] * landpad_det.pos_body_enu_frame[i];
-						// }
+				
 						float x = landpad_det.pos_body_enu_frame[0];
 						float y = landpad_det.pos_body_enu_frame[1];
-						// if ( x <= 0.1) { x = 0; }
-						// if ( y <= 0.1) { y = 0; }
-						
+			
 						
 						if (Change_state) {
 							pre_x = x;
@@ -283,22 +321,11 @@ void FlyState_update(void)
 						}
                         vel_target[0] = kp_land[0] * x;
                         vel_target[1] = kp_land[1] * y;
-						// vel_target[0] = pos_drone[0] + x;
-                        // vel_target[1] = pos_drone[1] + y;
-						vel_target[2] = desire_z;
-                        // std::cout << "x: " << x << " y: " <<  y << std::endl;
-						
-						// vel_target[0] = 0;
-                        // vel_target[1] = 0;
-						// vel_target[2] = 1.8;
-						// outFile << x << " " << y << endl;
-                        // send_pos_setpoint(vel_target, 0, 1);
+						vel_target[2] = set_init_height;
 
-						// cout << "(" << vel_target[0] << ", " << vel_target[1] << ")" << endl; 
-						float yaw_target;
-						yaw_target = present_yaw - landpad_det.yaw_error;
-						cout << yaw_target << endl;
-						send_pos_setpoint(vel_target, yaw_target, 0);
+						
+						send_pos_setpoint(vel_target, landpad_det.yaw_error, 0);
+						cout << "(" << vel_target[0] << ", " << vel_target[1] << ") and yaw = " << landpad_det.yaw_error << endl; 
 						Change_state = false;
 						break;
 					}
@@ -322,13 +349,13 @@ void FlyState_update(void)
 						{
 							vel_target[0] = 0.0;
 							vel_target[1] = 0.0;
-							vel_target[2] = desire_z;
+							vel_target[2] = set_init_height;
 							ros::Duration(0.4).sleep();
 						}else
 						{
 							vel_target[0] = 0.0;
 							vel_target[1] = 0.0;
-							vel_target[2] = desire_z+1.0;
+							vel_target[2] = set_init_height+1.0;
 						}
 						send_pos_setpoint(vel_target, present_yaw, 0);
 						break;
@@ -367,13 +394,15 @@ int main(int argc, char **argv)
     //  标志位：   detected 用作标志位 ture代表识别到目标 false代表丢失目标
     ros::Subscriber landpad_det_sub = nh.subscribe<prometheus_msgs::DetectionInfo>("/prometheus/object_detection/landpad_det", 10, landpad_det_cb);
     ros::Subscriber drone_state_sub = nh.subscribe<prometheus_msgs::DroneState>("/prometheus/drone_state", 10, drone_state_cb); //【订阅】无人机姿态
+	ros::Subscriber link_states_sub = nh.subscribe("/gazebo/link_states", 10, linkStatesCallback);
+   
     // = nh.advertise<prometheus_msgs::ControlCommand>("/prometheus/control_command", 10);//【发布】发送给控制模块 [px4_pos_controller.cpp]的命令
     setpoint_raw_local_pub = nh.advertise<mavros_msgs::PositionTarget>("/mavros/setpoint_raw/local", 10);
+	// ros::Subscriber gps_sub = nh.subscribe<sensor_msgs::NavSatFix>("/mavros/global_position/global",100, gps_cb);
 
-    // 【服务】修改系统模式
-    // set_mode_client = nh.serviceClient<mavros_msgs::SetMode>("/mavros/set_mode");
+    
 	
-   	nh.param<float>("desire_z", desire_z, 1.0);
+   	nh.param<float>("set_init_height", set_init_height, 2.0);
 	//追踪控制参数
     nh.param<float>("kpx_land", kp_land[0], 0.1);
     nh.param<float>("kpy_land", kp_land[1], 0.1);
@@ -382,13 +411,16 @@ int main(int argc, char **argv)
     // 相机安装偏移,规定为:相机在机体系(质心原点)的位置
     nh.param<float>("camera_offset_x", camera_offset[0], 0.0);
     nh.param<float>("camera_offset_y", camera_offset[1], 0.0);
-    nh.param<float>("camera_offset_z", camera_offset[2], 0.0);
-
+    nh.param<float>("camera_offset_z", camera_offset[2], 0.2);
+	int i = 0;
     while(ros::ok())
     {
+		i ++;
  		ros::spinOnce();
 		FlyState_update();
-        // std::cout << FlyState << " & " << exec_state << std::endl;
+		if (i % 20 == 0) {
+			std::cout << FlyState_name[FlyState] << " & " << exec_state_name[exec_state] << std::endl;
+		}
 
         rate.sleep();
     }
