@@ -13,6 +13,7 @@ from geometry_msgs.msg import PoseStamped, Twist
 from sensor_msgs.msg import Imu, NavSatFix
 from std_msgs.msg import Float32, String
 from gazebo_msgs.msg import LinkStates
+# from img_warp_and_stitch.stitch_stream import MATCHING
 
 import sys
 import rospy
@@ -114,22 +115,26 @@ class Controller:
 		self.swithch_down = 0
 	
 		self.pwd = sys.path[0]
-		self.vw_down = cv2.VideoWriter(self.pwd+'/videos/down.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 10, (1280,720))
+		self.vw_down = cv2.VideoWriter(self.pwd+'/videos/down.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 10, (1280,1280))
 		self.vw_front = cv2.VideoWriter(self.pwd+'/videos/front.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 10, (1280,720))
+		# self.vw_stitch = cv2.VideoWriter(self.pwd+'/videos/stitch.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 10, (680,690))
+		self.down = None
 		print("Initialized")
 
 	def downlooking_camera_callback(self, data): #e
 		# 使用cv_bridge将ROS的图像数据转换成OpenCV的图像格式
-		if (self.swithch_down):
+		if (self.swithch_front):
 			try:
 				cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+				self.down = cv_image
 			except CvBridgeError as e:
 				print(e)
 			if (PIC_VIDEO):
 				if (self.key == 'q'):
 					cv2.imwrite(self.pwd + "/pics/down"+str(self.swithch_front)+".jpg", cv_image)
 			else:
-				if (self.swithch_down % 2 == 0):
+				if (self.swithch_front % 2 == 0):
+				# if (self.swithch_down % 2 == 0):
 					self.vw_down.write(cv_image)
 					cv2.putText(cv_image,"RECORDING",(1050, 40),cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 			# 显示Opencv格式的图像
@@ -153,6 +158,7 @@ class Controller:
 				if (self.swithch_front % 2 == 0):
 					self.vw_front.write(cv_image)
 					cv2.putText(cv_image,"RECORDING",(1050, 40),cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+					
 				
 			cv2.imshow("Image front", cv_image)
 			cv2.waitKey(3)

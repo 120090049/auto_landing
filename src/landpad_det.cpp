@@ -100,7 +100,7 @@ Eigen::Quaterniond q_vehicle;
 Eigen::Vector3d last_position;
 bool bool_last_position = false;
 // 接收消息，允许暂停检测
-bool is_suspanded = false;
+bool is_suspanded = true;
 bool local_print = true;
 bool message_print = true;
 
