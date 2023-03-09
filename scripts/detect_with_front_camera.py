@@ -29,9 +29,9 @@ img_label = {"diagonal": 0, "front_rear": 1, "left_right": 2, "background": 3}
 ROW = 720
 COL = 1280
 
-# 680*720
-STITCH_ROW = 690
-STITCH_COL = 680
+# 900*1200
+STITCH_ROW = 1200
+STITCH_COL = 900
 
 def draw_rects_on_img(img, rects):
     """ draw rects on an image.
@@ -237,38 +237,14 @@ class Front_camera_detect:
         return
     
 
-    # def main_loop(self):
-    #     pwd = sys.path[0]
-    #     cap_front = cv2.VideoCapture(pwd+'/videos/front.mp4')
-    #     cap_down = cv2.VideoCapture(pwd+'/videos/down.mp4')
-
-    #     rate = rospy.Rate(10) # 10hz
-    #     while not rospy.is_shutdown():
-    #         ret, img1 = cap_front.read()
-    #         ret, img2 = cap_down.read()
-    #         cv2.imshow("stitch_res", img1)
-    #         if False:
-    #             detected, target_yaw = self.Detector.process(img1)
-    #             if not detected:
-    #                 stitch_res = self.matcher.process_img(img1, img2)
-    #                 if (stitch_res is not None):
-    #                     # print(stitch_res.shape[:2])
-    #                     detected, target_yaw = self.Detector_sti.process(stitch_res)
-    #             # print(detected, target_yaw)
-    #             self.boat_yaw_msg.header.stamp = rospy.Time.now()
-    #             self.boat_yaw_msg.detected = detected
-    #             self.boat_yaw_msg.yaw_error = math.radians(target_yaw)
-    #             self.boat_yaw_pub.publish(self.boat_yaw_msg)
-    #         rate.sleep()
-    #     return
 
     def main_loop(self):
         rate = rospy.Rate(10) # 10hz
         while not rospy.is_shutdown():
-            if self.switch:
+            if self.switch and (self.cv_image_front is not None):
                 detected, target_yaw = self.Detector.process(self.cv_image_front)
-                # if not detected:
-                if True:
+                if not detected:
+                # if True:
                     stitch_res = self.matcher.process_img(self.cv_image_front, self.cv_image_down)
                     if (stitch_res is not None):
                         # cv2.imshow("stitch_res", stitch_res)

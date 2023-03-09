@@ -200,7 +200,7 @@ bool getImageStatus(void)
 void switchCallback(const std_msgs::Bool::ConstPtr& msg)
 {
     is_suspanded = !(bool)msg->data;
-    std::cout << is_suspanded << std::endl;
+    // std::cout << is_suspanded << std::endl;
 }
 
 

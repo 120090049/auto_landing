@@ -10,7 +10,6 @@
 #include <mavros_msgs/SetMode.h>
 #include <Eigen/Eigen>
 #include <geometry_msgs/PoseStamped.h>
-#include <geometry_msgs/TwistStamped.h>
 #include <tf/transform_datatypes.h>
 #include <sensor_msgs/NavSatFix.h>
 #include <fstream>
@@ -55,19 +54,13 @@ float present_yaw;
 
 double UAV_GPS[3];
 double USV_GPS[3];
-double BOUY_GPS_z_pre = 0;
 double BOUY_GPS_z;
-double BOUY_GPS_vz;
 
 float set_init_height; //无人机 offboard prepare to control 时无人机set to初始高度
 float set_approach_height; //无人机进入approach stage时的目标高度
 float init_height = 0.0; // initial height 对于无人机的高度控制很重要 
 				   // 比如如果是在10m的高度无人机开机，那么set_height to 5, 则要给飞控发送-5米的指令，反正就是要-10m（initial height的高度）
 
-// parameter for compensation
-float K_v = 0.8;
-float K_p = 0.8;
-float V_rel = 0.2;
 //主状态
 enum
 {
@@ -107,15 +100,6 @@ void pos_cb(const geometry_msgs::PoseStamped::ConstPtr &msg)
     Eigen::Vector3d pos_drone_fcu_enu(msg->pose.position.x,msg->pose.position.y,msg->pose.position.z);
 
     pos_drone = pos_drone_fcu_enu;
-	// cout << "drone_height = " << pos_drone[2] << endl;
-}
-// 
- //接收来自飞控的当前飞机竖直方向的速度
-float vel_drone_z;                   
-void vel_cb(const geometry_msgs::TwistStamped::ConstPtr& msg)
-{
-    vel_drone_z = msg->twist.linear.z;
-	// cout << "vel_drone_v = " << vel_drone_v << endl;
 }
 
 //接收来自飞控的当前飞机状态
@@ -266,9 +250,6 @@ void linkStatesCallback(const gazebo_msgs::LinkStates::ConstPtr& msg)
 		}
 		if (0 == strcmp(msg->name[i].c_str(), "bouy::bouy::base_link") ) {
 			BOUY_GPS_z = msg->pose[i].position.z;
-			BOUY_GPS_vz = 20 * (BOUY_GPS_z - BOUY_GPS_z_pre); // 因为回调函数是20HZ V*20
-			BOUY_GPS_z_pre = BOUY_GPS_z;
-			// cout << "BOUY_GPS_vz = " << BOUY_GPS_vz << endl;
 		}
 		// float USV_GPS[3]; boat::base_link
 		// float BOUY_GPS_z; bouy::bouy::base_link
@@ -307,6 +288,7 @@ void FlyState_update(void)
 
 			if (init_height == 0.0) {
 				init_height = UAV_GPS[2] - pos_drone[2];
+				cout << UAV_GPS[2] << "  " << pos_drone[2] << endl;
 			}				
 			//这里的 pos_target其实是 vx,vy, z							
 			pos_target[0] = 0;
@@ -315,7 +297,7 @@ void FlyState_update(void)
 			send_pos_setpoint(pos_target, 0, 0);
 			if(UAV_GPS[2] >= set_init_height-0.5)
 			{
-				// cout << UAV_GPS[2] << ">=" <<  (set_init_height-0.5) << endl;
+				cout << UAV_GPS[2] << ">=" <<  (set_init_height-0.5) << endl;
 				cout << "Reach to initial height and ready for detection!" << endl;
 				FlyState = FLY;
 			}
@@ -392,7 +374,7 @@ void FlyState_update(void)
 								pre_x = x;
 								pre_y = y;
 							}
-							
+							// cout << "(" << x << ", " << y << ") and yaw = " << boat_det.yaw_error << endl; 
 							vel_target[0] = kp_land[0] * x;
 							vel_target[1] = kp_land[1] * y;
 							vel_target[2] = set_approach_height;
@@ -464,16 +446,8 @@ void FlyState_update(void)
 						}
                         vel_target[0] = kp_land[0] * x;
                         vel_target[1] = kp_land[1] * y;
-						if (abs(x) < 0.5 && abs(y) < 0.5 && abs(landpad_det.yaw_error) < 0.2) {
-							cout << "Ready for compensation" << endl;
-							// actually it is the position command
-							float velocity_next_state = vel_drone_z + K_v*(V_rel-BOUY_GPS_vz)
-							vel_target[2] = pos_drone[2] + K_p*(V_rel+BOUY_GPS_vz)
-						}
-						else {
-							vel_target[2] = set_approach_height-1;
-						}
-						cout << "(" << x << ", " << y << ") and yaw = " << landpad_det.yaw_error << endl; 
+						vel_target[2] = set_approach_height-1;
+
 						send_pos_setpoint(vel_target, landpad_det.yaw_error, 0);
 						Change_state = false;
 						break;
@@ -536,7 +510,6 @@ int main(int argc, char **argv)
     ros::Rate rate(20.0);
 
     ros::Subscriber position_sub = nh.subscribe<geometry_msgs::PoseStamped>("/mavros/local_position/pose", 100, pos_cb);
-	ros::Subscriber velocity_sub = nh.subscribe<geometry_msgs::TwistStamped>("/mavros/local_position/velocity_local", 100, vel_cb);
     ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>("/mavros/state", 10, state_cb);
 
     //【订阅】降落板与无人机的相对位置及相对偏航角  单位：米   单位：弧度
@@ -545,7 +518,7 @@ int main(int argc, char **argv)
     ros::Subscriber landpad_det_sub = nh.subscribe<prometheus_msgs::DetectionInfo>("/prometheus/object_detection/landpad_det", 10, landpad_det_cb);
     ros::Subscriber boat_det_sub = nh.subscribe<prometheus_msgs::DetectionInfo>("/prometheus/object_detection/boat_det", 10, boat_det_cb);
 	ros::Subscriber drone_state_sub = nh.subscribe<prometheus_msgs::DroneState>("/prometheus/drone_state", 10, drone_state_cb); //【订阅】无人机姿态
-	ros::Subscriber link_states_sub = nh.subscribe("/gazebo/link_states", 1, linkStatesCallback);
+	ros::Subscriber link_states_sub = nh.subscribe("/gazebo/link_states", 10, linkStatesCallback);
    
     setpoint_raw_local_pub = nh.advertise<mavros_msgs::PositionTarget>("/mavros/setpoint_raw/local", 10);
     front_cam_detect_switch = nh.advertise<std_msgs::Bool>("/prometheus/switch/boat_det", 10);

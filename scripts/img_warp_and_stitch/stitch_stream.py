@@ -57,7 +57,7 @@ class MATCHING():
     def warpping(self):
         self.front_dia = cv2.warpPerspective(self.front, self.H_front, self.size_front)[0:350, 180:1100]  # 横轴x, 纵轴y
         self.down_dia = cv2.warpPerspective(self.down, self.H_down, self.size_down)[370:1280, 180:1100]
-        cv2.imshow("self.front_dia", self.front_dia)
+        # cv2.imshow("self.front_dia", self.front_dia)
         # cv2.imshow("self.down_dia", self.down_dia)
     def stitch_test(self):
         self.size_front = (self.front.shape[1], self.front.shape[0])
