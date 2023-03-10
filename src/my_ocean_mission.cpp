@@ -7,7 +7,8 @@
 #include <cmath>
 #include <mavros_msgs/PositionTarget.h>
 #include <mavros_msgs/State.h>
-#include <mavros_msgs/SetMode.h>
+#include <mavros_msgs/SetMode.h> 
+#include <mavros_msgs/CommandBool.h>
 #include <Eigen/Eigen>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
@@ -20,6 +21,7 @@
 
 #include "mission_utils.h"
 #include "message_utils.h"
+
 
 using namespace std;
 using namespace Eigen;
@@ -39,6 +41,11 @@ Eigen::Vector3d pos_target;//offboard模式下，发送给飞控的期望值
 Eigen::Vector3d vel_target;//offboard模式下，发送给飞控的期望值
 
 mavros_msgs::SetMode mode_cmd;
+
+ros::ServiceClient set_mode_client;
+ros::ServiceClient arming_client;
+ros::ServiceClient landing_client;
+
 ros::Publisher setpoint_raw_local_pub;
 ros::Publisher front_cam_detect_switch;
 ros::Publisher down_cam_detect_switch;
@@ -50,7 +57,6 @@ Eigen::Matrix3f R_Body_to_ENU;              // 无人机机体系至惯性系转
 
 Detection_result boat_det;               // 前视摄像头检测结果
 Detection_result landpad_det;               // 下视摄像头检测结果
-float kp_land[2];         //控制参数 - 比例参数
 float present_yaw;
 
 double UAV_GPS[3];
@@ -67,7 +73,8 @@ float init_height = 0.0; // initial height 对于无人机的高度控制很重�
 // parameter for compensation
 float K_v = 0.8;
 float K_p = 0.8;
-float V_rel = 0.2;
+float V_target_rel = -0.1; // 向上为正
+// float V_target_rel = 0; // 向上为正
 //主状态
 enum
 {
@@ -83,11 +90,12 @@ enum
 {
     APPROACH_GNSS,
 	APPROACH_FRONT_CAMERA,
-    TRACKING_AND_LANDING,
+    TRACKING_AND_DESCENDING,
     LOST_AND_ASCENDING,
+	LANDING
     // LANDING,
 }exec_state = APPROACH_GNSS;
-const char* exec_state_name[] = {"APPROACH_GNSS", "APPROACH_FRONT_CAMERA", "TRACKING_AND_LANDING", "LOST_AND_ASCENDING"};
+const char* exec_state_name[] = {"APPROACH_GNSS", "APPROACH_FRONT_CAMERA", "TRACKING_AND_DESCENDING", "LOST_AND_ASCENDING", "LANDING"};
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -107,7 +115,6 @@ void pos_cb(const geometry_msgs::PoseStamped::ConstPtr &msg)
     Eigen::Vector3d pos_drone_fcu_enu(msg->pose.position.x,msg->pose.position.y,msg->pose.position.z);
 
     pos_drone = pos_drone_fcu_enu;
-	// cout << "drone_height = " << pos_drone[2] << endl;
 }
 // 
  //接收来自飞控的当前飞机竖直方向的速度
@@ -115,7 +122,6 @@ float vel_drone_z;
 void vel_cb(const geometry_msgs::TwistStamped::ConstPtr& msg)
 {
     vel_drone_z = msg->twist.linear.z;
-	// cout << "vel_drone_v = " << vel_drone_v << endl;
 }
 
 //接收来自飞控的当前飞机状态
@@ -181,13 +187,13 @@ void boat_det_cb(const prometheus_msgs::DetectionInfo::ConstPtr &msg)
     }
 
     // 当连续一段时间无法检测到目标时，认定目标丢失
-    if(boat_det.num_lost > VISION_THRES-5)
+    if(boat_det.num_lost > VISION_THRES)
     {
         boat_det.is_detected = false;
     }
 
     // 当连续一段时间检测到目标时，认定目标得到
-    if(boat_det.num_regain > VISION_THRES+10)
+    if(boat_det.num_regain > VISION_THRES+5)
     {
         boat_det.is_detected = true;
     }
@@ -219,7 +225,7 @@ void landpad_det_cb(const prometheus_msgs::DetectionInfo::ConstPtr &msg)
         landpad_det.num_lost++;
     }
     // 当连续一段时间无法检测到目标时，认定目标丢失
-    if(landpad_det.num_lost > VISION_THRES)
+    if(landpad_det.num_lost > VISION_THRES+5)
     {
         landpad_det.is_detected = false;
     }
@@ -268,7 +274,6 @@ void linkStatesCallback(const gazebo_msgs::LinkStates::ConstPtr& msg)
 			BOUY_GPS_z = msg->pose[i].position.z;
 			BOUY_GPS_vz = 20 * (BOUY_GPS_z - BOUY_GPS_z_pre); // 因为回调函数是20HZ V*20
 			BOUY_GPS_z_pre = BOUY_GPS_z;
-			// cout << "BOUY_GPS_vz = " << BOUY_GPS_vz << endl;
 		}
 		// float USV_GPS[3]; boat::base_link
 		// float BOUY_GPS_z; bouy::bouy::base_link
@@ -277,7 +282,7 @@ void linkStatesCallback(const gazebo_msgs::LinkStates::ConstPtr& msg)
 
 
 //主状态机更新
-void FlyState_update(void)
+bool FlyState_update(void)
 {
 	switch(FlyState)
 	{
@@ -299,7 +304,7 @@ void FlyState_update(void)
 				pos_target[2] = temp_pos_drone[2];
 				send_pos_setpoint(pos_target, 0, 1);
 				FlyState = PREPARE;
-				cout << "Start offboard mode!" << endl;
+				ROS_INFO("Start offboard mode!");
 			}
 			break;
 
@@ -315,14 +320,13 @@ void FlyState_update(void)
 			send_pos_setpoint(pos_target, 0, 0);
 			if(UAV_GPS[2] >= set_init_height-0.5)
 			{
-				// cout << UAV_GPS[2] << ">=" <<  (set_init_height-0.5) << endl;
-				cout << "Reach to initial height and ready for detection!" << endl;
+				ROS_INFO("Reach to initial height and ready for detection! First entering APPROACH_GNSS mode");
 				FlyState = FLY;
 			}
 			if(current_state.mode != "OFFBOARD")				//如果在REST途中切换到onboard，则跳到WAITING
 			{
 				FlyState = WAITING;
-				cout << "Change back to the original mode" << endl;
+				ROS_INFO("Change back to the waiting mode");
 			}
 			
 			break;
@@ -356,7 +360,7 @@ void FlyState_update(void)
 						{
 							exec_state = APPROACH_FRONT_CAMERA;
 							Change_state = true;
-							cout << "Get the front camera detection result and get to the APPROACH_FRONT_CAMERA mode." <<endl;
+							ROS_INFO("Get the front camera detection result and get to the APPROACH_FRONT_CAMERA mode.");
 							break;
 						}
 						
@@ -364,9 +368,9 @@ void FlyState_update(void)
 						// // whether the front camera detected
 						else if(landpad_det.is_detected)
 						{
-							exec_state = TRACKING_AND_LANDING;
+							exec_state = TRACKING_AND_DESCENDING;
 							Change_state = true;
-							cout << "Get the down-looking camera detection result and get to the TRACKING_AND_LANDING." <<endl;
+							ROS_INFO("Get the down-looking camera detection result and get to the TRACKING_AND_DESCENDING.");
 							std_msgs::Bool switch_front;
 							switch_front.data = false;
 							front_cam_detect_switch.publish(switch_front);
@@ -379,7 +383,10 @@ void FlyState_update(void)
 						// submodule 1 front looking camera operation
 						if(boat_det.is_detected) // whether the front camera detected
 						{
-							time_keep_moving = 0;
+							if (time_keep_moving != 0) {
+								time_keep_moving = 0;
+								ROS_INFO("Regain the target.");
+							}
 							float x = boat_det.pos_body_enu_frame[0];
 							float y = boat_det.pos_body_enu_frame[1];
 							if (Change_state) {
@@ -393,8 +400,10 @@ void FlyState_update(void)
 								pre_y = y;
 							}
 							
-							vel_target[0] = kp_land[0] * x;
-							vel_target[1] = kp_land[1] * y;
+							// double square = sqrt( pow(x, 2) + pow(y, 2) );
+							vel_target[0] = x;
+							vel_target[1] = y;
+
 							vel_target[2] = set_approach_height;
 							pre_vel_target[0] = vel_target[0];
 							pre_vel_target[1] = vel_target[1];
@@ -404,14 +413,16 @@ void FlyState_update(void)
 						}
 						else {
 							if (time_keep_moving < 200) { // still keep moving for a while
-								cout << "Although lost, still keep moving" << endl;
+								if (time_keep_moving == 20) {
+									cout << "Although lost target, still keep moving along the original direction." << endl;
+								}
 								time_keep_moving ++;
 								send_pos_setpoint(pre_vel_target, 0, 0);
 							}
 							else {
 								exec_state = APPROACH_GNSS;
 								Change_state = true;
-								cout << "Lost the front camera detection result back to the APPROACH_GNSS mode." <<endl;
+								ROS_INFO("Lost the front camera detection result back to the APPROACH_GNSS mode.");
 								break;
 							}
 					
@@ -427,9 +438,9 @@ void FlyState_update(void)
 						// // whether the front camera detected
 						if(landpad_det.is_detected)
 						{
-							exec_state = TRACKING_AND_LANDING;
+							exec_state = TRACKING_AND_DESCENDING;
 							Change_state = true;
-							cout << "Get the down-looking camera detection result and get to the TRACKING_AND_LANDING." <<endl;
+							ROS_INFO("Get the down-looking camera detection result and get to the TRACKING_AND_DESCENDING mode.");
 							std_msgs::Bool switch_front;
 							switch_front.data = false;
 							front_cam_detect_switch.publish(switch_front);
@@ -438,14 +449,14 @@ void FlyState_update(void)
 					}
 				
 					
-					// 追踪状态 
-					case TRACKING_AND_LANDING: 
+					// 追踪与下降
+					case TRACKING_AND_DESCENDING: 
 					{
 						// 丢失,进入LOST状态
-						if(!landpad_det.is_detected)
+						if(!landpad_det.is_detected && landpad_det.Detection_info.position[2] >= 0.3)
 						{
 							exec_state = LOST_AND_ASCENDING;
-							cout << "Lost the Landing Pad and ascending." <<endl;
+							ROS_INFO("Lost the Landing Pad and ascending.");
 							break;
 						}   
 
@@ -462,19 +473,41 @@ void FlyState_update(void)
 							pre_x = x;
 							pre_y = y;
 						}
-                        vel_target[0] = kp_land[0] * x;
-                        vel_target[1] = kp_land[1] * y;
-						if (abs(x) < 0.5 && abs(y) < 0.5 && abs(landpad_det.yaw_error) < 0.2) {
-							cout << "Ready for compensation" << endl;
+						// cout << x << " and " << y << endl;
+						if (x > 1) x = 1;
+						else if (x < -1) x = -1;
+						if (y > 1) y = 1;
+						else if (y < -1) y = -1;
+                        vel_target[0] = x;
+                        vel_target[1] = y;
+						if (abs(x) < 0.5 && abs(y) < 0.5 && landpad_det.Detection_info.position[2] <= 5) {
+							// cout << "Compensating" << endl;
+							vel_target[0] = 3*x;
+                        	vel_target[1] = 3*y;
 							// actually it is the position command
-							float velocity_next_state = vel_drone_z + K_v*(V_rel-BOUY_GPS_vz)
-							vel_target[2] = pos_drone[2] + K_p*(V_rel+BOUY_GPS_vz)
+							float vel_drone_z_star = vel_drone_z + K_v*(V_target_rel+BOUY_GPS_vz-vel_drone_z);
+							vel_target[2] = init_height + pos_drone[2] + K_p*vel_drone_z_star;
 						}
 						else {
 							vel_target[2] = set_approach_height-1;
 						}
-						cout << "(" << x << ", " << y << ") and yaw = " << landpad_det.yaw_error << endl; 
-						send_pos_setpoint(vel_target, landpad_det.yaw_error, 0);
+						send_pos_setpoint(vel_target, 0, 0);
+						// 进入LANGING与上锁模式
+						if (landpad_det.Detection_info.position[2] <= 0.15 && BOUY_GPS_vz > 0.02) 
+						{
+							// 切换到LANDING模式
+							
+							ROS_INFO("Switch to LANDING mode!");
+							exec_state = LANDING;
+
+							// switch off the down-looking camera
+							std_msgs::Bool switch_down;
+							switch_down.data = false;
+							down_cam_detect_switch.publish(switch_down);
+							Change_state = true;
+							
+							break;
+						}
 						Change_state = false;
 						break;
 					}
@@ -487,9 +520,9 @@ void FlyState_update(void)
 						// 重新获得信息,进入TRACKING
 						if(landpad_det.is_detected)
 						{
-							exec_state = TRACKING_AND_LANDING;
+							exec_state = TRACKING_AND_DESCENDING;
 							lost_time = 0;
-							cout << "Regain the Landing Pad." <<endl;
+							ROS_INFO("Regain the Landing Pad and get back to the TRACKING_AND_DESCENDING mode." );
 							Change_state = true;
 							break;
 						}   
@@ -507,10 +540,29 @@ void FlyState_update(void)
 							vel_target[1] = 0.0;
 							vel_target[2] = set_approach_height+1.0;
 						}
-						send_pos_setpoint(vel_target, present_yaw, 0);
+						send_pos_setpoint(vel_target, 0, 0);
 						break;
 					}
 
+					case LANDING:
+					{
+						mavros_msgs::SetMode landing_set_mode;		
+						landing_set_mode.request.custom_mode = "STABILIZED";					
+						if (set_mode_client.call(landing_set_mode) && landing_set_mode.response.mode_sent) {
+							sleep(3);
+							ROS_INFO("LOCK");
+							return true;
+							// mavros_msgs::CommandBool arm_cmd;
+							// arm_cmd.request.value = false;
+
+							// if (arming_client.call(arm_cmd) && arm_cmd.response.success)
+							// {
+							// 	ROS_INFO("Successfully locked!");
+							// 	return true;
+							// }
+						}
+						break;
+					}
 				}
 				
 				if(current_state.mode != "OFFBOARD")			//如果在飞圆形中途中切换到onboard，则跳到WAITING
@@ -522,7 +574,9 @@ void FlyState_update(void)
 
 		default:
 			cout << "error" <<endl;
-	}	
+		
+	}
+	return false;	
 }				
 
 
@@ -546,8 +600,11 @@ int main(int argc, char **argv)
     ros::Subscriber boat_det_sub = nh.subscribe<prometheus_msgs::DetectionInfo>("/prometheus/object_detection/boat_det", 10, boat_det_cb);
 	ros::Subscriber drone_state_sub = nh.subscribe<prometheus_msgs::DroneState>("/prometheus/drone_state", 10, drone_state_cb); //【订阅】无人机姿态
 	ros::Subscriber link_states_sub = nh.subscribe("/gazebo/link_states", 1, linkStatesCallback);
-   
-    setpoint_raw_local_pub = nh.advertise<mavros_msgs::PositionTarget>("/mavros/setpoint_raw/local", 10);
+	
+	set_mode_client = nh.serviceClient<mavros_msgs::SetMode>("/mavros/set_mode");
+    arming_client = nh.serviceClient<mavros_msgs::CommandBool>("/mavros/cmd/arming");
+
+	setpoint_raw_local_pub = nh.advertise<mavros_msgs::PositionTarget>("/mavros/setpoint_raw/local", 10);
     front_cam_detect_switch = nh.advertise<std_msgs::Bool>("/prometheus/switch/boat_det", 10);
 	down_cam_detect_switch = nh.advertise<std_msgs::Bool>("/prometheus/switch/landpad_det", 10);
 	
@@ -555,12 +612,9 @@ int main(int argc, char **argv)
 
     
 	
-   	nh.param<float>("set_init_height", set_init_height, 12.0);
+   	nh.param<float>("set_init_height", set_init_height, 10.0);
 	nh.param<float>("set_approach_height", set_approach_height, 5.0);
 	
-	//追踪控制参数
-    nh.param<float>("kpx_land", kp_land[0], 0.1);
-    nh.param<float>("kpy_land", kp_land[1], 0.1);
 
     // 相机安装偏移,规定为:相机在机体系(质心原点)的位置
     nh.param<float>("camera_offset_x", camera_offset[0], 0.0);
@@ -571,14 +625,15 @@ int main(int argc, char **argv)
     {
 		i ++;
  		ros::spinOnce();
-		FlyState_update();
-		if (i % 20 == 0) {
-			std::cout << FlyState_name[FlyState] << " & " << exec_state_name[exec_state] << std::endl;
-		}
-
+		bool end = FlyState_update();
+		if (end) break;
+		// if (i % 20 == 0) {
+		// 	std::cout << FlyState_name[FlyState] << " & " << exec_state_name[exec_state] << std::endl;
+		// }
         rate.sleep();
     }
-
+	ROS_INFO("LANDING SUCCESSFULLY!!!");
+	sleep(20);
     return 0;
 
 }

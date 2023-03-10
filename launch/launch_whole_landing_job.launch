@@ -1,0 +1,3 @@
+<launch>
+	<node name="pad_car_teleop" pkg="auto_landing" type="teleop_for_pad_car.py" output="screen"/>
+</launch>

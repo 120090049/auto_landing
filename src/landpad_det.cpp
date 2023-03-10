@@ -604,7 +604,7 @@ int main(int argc, char **argv)
             calculation_time=(finish-start)/1000;
             
             // 打印
-            // printf_result();
+            printf_result();
             msg_ellipse = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img).toImageMsg();
             landpad_pub.publish(msg_ellipse);
             cv::imshow("camera",img);

@@ -51,7 +51,7 @@ command_cotrol
 2 : OFFBOARDS
 3 : LAND
 4 : POSCTL
-5 : ATTITCTL
+5 : STABILIZED
 ---------------------------
 
 CTRL-C to quit
@@ -190,6 +190,11 @@ class Controller:
 				print("Vehicle arming succeed!")
 			else:
 				print("Vehicle arming failed!")
+		if self.key == '6':
+			if self.armServer(False) :
+				print("Vehicle disarming succeed!")
+			else:
+				print("Vehicle arming failed!")
 		elif self.key == '1':
 			if self.setModeServer(custom_mode='AUTO.TAKEOFF'):
 				print("Vehicle takeoff succeed!")
@@ -270,7 +275,8 @@ class Controller:
 			self.command_control()
 			self.action_control()
 			self.local_target_pub.publish(self.cur_target_rc_yaw)
-			print(self.height)
+			# print(self.mavros_state.mode)
+			# print(self.height)
 			if (controller.key == '\x03'):
 				break
 

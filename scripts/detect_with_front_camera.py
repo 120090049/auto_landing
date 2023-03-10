@@ -17,13 +17,20 @@ from sensor_msgs.msg import Image
 from std_msgs.msg import Bool
 from prometheus_msgs.msg import DetectionInfo
 from img_warp_and_stitch.stitch_stream import MATCHING
+import termios
 
+TEST = False
 
 SHOW_PROCESS = False
 RECORD_AS_VIDEO = False
 
-cls_names = ["diagonal", "front_rear", "left_right", "background"]
-img_label = {"diagonal": 0, "front_rear": 1, "left_right": 2, "background": 3}
+
+lower = None
+upper = None
+
+
+cls_names = ["boat", "background"]
+img_label = {"boat": 0, "background": 1}
 
 # 1280*720
 ROW = 720
@@ -54,8 +61,10 @@ class Detect():
         self.rows = row  # 720
         self.cols = col  # 1280
         self.img_title = str(row) + "*" + str(col)
-        self.lower = np.array([50, 0, 0])
-        self.upper = np.array([179, 255, 115])
+        
+        
+        self.lower = np.array([0, 0, 0])
+        self.upper = np.array([140, 255, 110])
 
         self.kernelDilation = np.ones((3, 3), np.uint8)
         self.kernelOpen = np.ones((4, 4), np.uint8)
@@ -64,6 +73,8 @@ class Detect():
         self.clf = clf
 
         self.cv_or_sk = cv_or_sk
+
+        
 
 
     def preprocess_img(self, erode_dilate=True):
@@ -74,21 +85,31 @@ class Detect():
             img_bin: a binary image (blue and red).
 
         """
-        imgHSV = cv2.cvtColor(self.image, cv2.COLOR_BGR2HSV)
-     
-        img_bin = cv2.inRange(imgHSV, self.lower, self.upper)
-
-        img_bin = cv2.dilate(img_bin, self.kernelDilation, iterations=1)
-        img_bin = cv2.morphologyEx(img_bin, cv2.MORPH_CLOSE, self.kernelClose)
-        img_bin = cv2.morphologyEx(img_bin, cv2.MORPH_OPEN, self.kernelOpen)
-        contours, _ = cv2.findContours(
-            img_bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         rects = []
-        for contour in contours:
-            x, y, w, h = cv2.boundingRect(contour)
-            area = cv2.contourArea(contour)
-            if (w/h > 1 and w/h < 4.5 and area > 400):
-                rects.append([x, y, w, h])
+        try:
+            if (self.image is not None):
+                imgHSV = cv2.cvtColor(self.image, cv2.COLOR_BGR2HSV)
+
+                if (TEST):
+                    global lower, upper
+                    img_bin = cv2.inRange(imgHSV, lower, upper)
+                else:
+                    img_bin = cv2.inRange(imgHSV, self.lower, self.upper)
+
+                img_bin = cv2.dilate(img_bin, self.kernelDilation, iterations=1)
+                img_bin = cv2.morphologyEx(img_bin, cv2.MORPH_CLOSE, self.kernelClose)
+                img_bin = cv2.morphologyEx(img_bin, cv2.MORPH_OPEN, self.kernelOpen)
+                contours, _ = cv2.findContours(
+                    img_bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+                if (TEST):
+                    cv2.imshow("img_bin", img_bin)
+                for contour in contours:
+                    x, y, w, h = cv2.boundingRect(contour)
+                    area = cv2.contourArea(contour)
+                    if (w/h > 0.4 and w/h < 4.5 and area > 400):
+                        rects.append([x, y, w, h])
+        except:
+            pass
         return rects
 
     def hog_extra_and_svm_class(self, target_area, resize=(64, 32)):
@@ -125,7 +146,7 @@ class Detect():
         self.image = img
         rects = self.preprocess_img(erode_dilate=False)
 
-        if (SHOW_PROCESS):
+        if (TEST):
             img_rects = draw_rects_on_img(self.image, rects)
             cv2.imshow("image with rects", img_rects)
            
@@ -146,7 +167,7 @@ class Detect():
             cls_num = np.argmax(prob_for_class[0:-1])
             prop = prob_for_class[cls_num]
 
-            if (prob_for_class[-1] < 0.6):
+            if (prob_for_class[0] > 0.8):
                 center = int((x1 + x2)/2)
                 target_yaw = 200 * (center - self.cols/2) / self.cols
                 detected = True
@@ -238,28 +259,93 @@ class Front_camera_detect:
     
 
 
+    # def main_loop(self):
+    
     def main_loop(self):
-        rate = rospy.Rate(10) # 10hz
-        while not rospy.is_shutdown():
-            if self.switch and (self.cv_image_front is not None):
-                detected, target_yaw = self.Detector.process(self.cv_image_front)
-                if not detected:
+        if (TEST):
+            rate = rospy.Rate(10) # 10hz
+            while not rospy.is_shutdown():
+            
                 # if True:
-                    stitch_res = self.matcher.process_img(self.cv_image_front, self.cv_image_down)
-                    if (stitch_res is not None):
-                        # cv2.imshow("stitch_res", stitch_res)
-                        # print(stitch_res.shape[:2])
-                        detected, target_yaw = self.Detector_sti.process(stitch_res)
+                stitch_res = self.matcher.process_img(self.cv_image_front, self.cv_image_down)
+                if (stitch_res is not None):
+                    # cv2.imshow("stitch_res", stitch_res)
+                    # print(stitch_res.shape[:2])
+                    detected, target_yaw = self.Detector_sti.process(stitch_res)
                 # print(detected, target_yaw)
-                self.boat_yaw_msg.header.stamp = rospy.Time.now()
-                self.boat_yaw_msg.detected = detected
-                self.boat_yaw_msg.yaw_error = math.radians(target_yaw)
-                self.boat_yaw_pub.publish(self.boat_yaw_msg)
-            rate.sleep()
+                    self.boat_yaw_msg.header.stamp = rospy.Time.now()
+                    self.boat_yaw_msg.detected = detected
+                    self.boat_yaw_msg.yaw_error = math.radians(target_yaw)
+                    self.boat_yaw_pub.publish(self.boat_yaw_msg)
+                rate.sleep()
+        else:
+            rate = rospy.Rate(10) # 10hz
+            while not rospy.is_shutdown():
+                try:
+                    if self.switch and (self.cv_image_front is not None):
+                        detected, target_yaw = self.Detector.process(self.cv_image_front)
+                        if not detected:
+                            stitch_res = self.matcher.process_img(self.cv_image_front, self.cv_image_down)
+                            if (stitch_res is not None):
+                                # cv2.imshow("stitch_res", stitch_res)
+                                # print(stitch_res.shape[:2])
+                                detected, target_yaw = self.Detector_sti.process(stitch_res)
+                        # print(detected, target_yaw)
+                        self.boat_yaw_msg.header.stamp = rospy.Time.now()
+                        self.boat_yaw_msg.detected = detected
+                        self.boat_yaw_msg.yaw_error = math.radians(target_yaw)
+                        self.boat_yaw_pub.publish(self.boat_yaw_msg)
+                except:
+                    pass
+                rate.sleep()
+    #     return
         return
 
 
 if __name__ == "__main__":
+    if (TEST):
+        # 回调函数必须要写
+        def empty(i):
+            global lower, upper
+            # 提取滑动条的数值 共6个
+            hue_min = cv2.getTrackbarPos("Hue Min", "sb")
+            hue_max = cv2.getTrackbarPos("Hue Max", "sb")
+            sat_min = cv2.getTrackbarPos("Sat Min", "sb")
+            sat_max = cv2.getTrackbarPos("Sat Max", "sb")
+            val_min = cv2.getTrackbarPos("Val Min", "sb")
+            val_max = cv2.getTrackbarPos("Val Max", "sb")
+            
+        
+            # img = cv2.imread("/home/clp/catkin_ws/src/auto_landing/scripts/tools/img.jpg")
+            # imgHSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+            # 颜色空间阈值
+            lower = np.array([hue_min, sat_min, val_min])
+            upper = np.array([hue_max, sat_max, val_max])
+        
+
+
+
+        # 读取图像
+        # 参数(‘窗口标题’,默认参数)
+        cv2.namedWindow("sb")
+        # 设置窗口大小
+        cv2.resizeWindow("sb", 640, 240)
+
+        # 第一个参数时滑动条的名字，
+        # 第二个参数是滑动条被放置的窗口的名字，
+        # 第三个参数是滑动条默认值，
+        # 第四个参数时滑动条的最大值，
+        # 第五个参数时回调函数，每次滑动都会调用回调函数。
+        cv2.createTrackbar("Hue Min", "sb", 0, 179, empty)
+        cv2.createTrackbar("Hue Max", "sb", 140, 179, empty)
+        cv2.createTrackbar("Sat Min", "sb", 0, 255, empty)
+        cv2.createTrackbar("Sat Max", "sb", 255, 255, empty)
+        cv2.createTrackbar("Val Min", "sb", 0, 255, empty)
+        cv2.createTrackbar("Val Max", "sb", 110, 255, empty)
+        # 调用函数
+        empty(0)
+
+        settings = termios.tcgetattr(sys.stdin)
 
     front_camera_detector = Front_camera_detect()
     front_camera_detector.main_loop()

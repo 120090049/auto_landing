@@ -128,7 +128,7 @@
     </model>
     <!-- Models  -->
     <model name="invisible_plate">
-      <pose>10 5 10 0 0 0 </pose>
+      <pose>30 15 6 0 0 0 </pose>
       <include>
         <uri>model://invisible_plate</uri>
       </include>
