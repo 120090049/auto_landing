@@ -612,7 +612,7 @@ int main(int argc, char **argv)
 
     
 	
-   	nh.param<float>("set_init_height", set_init_height, 10.0);
+   	nh.param<float>("set_init_height", set_init_height, 8.0);
 	nh.param<float>("set_approach_height", set_approach_height, 5.0);
 	
 
@@ -633,7 +633,11 @@ int main(int argc, char **argv)
         rate.sleep();
     }
 	ROS_INFO("LANDING SUCCESSFULLY!!!");
-	sleep(20);
+	mavros_msgs::SetMode landing_set_mode;		
+	landing_set_mode.request.custom_mode = "STABILIZED";
+	while (true) {
+		set_mode_client.call(landing_set_mode);
+	}
     return 0;
 
 }

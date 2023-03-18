@@ -34,11 +34,10 @@ if __name__ == '__main__':
         # Save the position information to the corresponding list
    
         
-
     # Plot the 3D trajectories of the links
     for topic_name in topic_names:
         link_name = topic_name.split("/")[0]
-        ax.plot(x_boat , y_boat, z_boat, label=link_name)
+        ax.plot(x_boat , y_boat, z_boat, label="USV trajectory")
 
 
     x_drone = []
@@ -51,9 +50,9 @@ if __name__ == '__main__':
         # Parse the link name and position information from the message
         link_name = topic.split("/")[-1]
         position = msg.pose.position
-        x_drone.append(position.x)
-        y_drone.append(position.y)
-        z_drone.append(position.z)
+        x_drone.append(position.x-0.1)
+        y_drone.append(position.y-0.1)
+        z_drone.append(position.z-1.35)
 
         # Save the position information to the corresponding list
    
@@ -62,7 +61,7 @@ if __name__ == '__main__':
     # Plot the 3D trajectories of the links
     for topic_name in topic_names:
         link_name = topic_name.split("/")[0]
-        ax.plot(x_drone , y_drone, z_drone, label=link_name)
+        ax.plot(x_drone , y_drone, z_drone, label="UAV trajectory")
 
 
     # Set the legend and axis labels
@@ -70,7 +69,8 @@ if __name__ == '__main__':
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
-
+    
+    plt.legend()
     # Show the plot
     plt.show()
 
