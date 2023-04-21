@@ -36,7 +36,7 @@
         </geometry>
         <material>
           <script>
-            <name>Gazebo/Black</name>
+            <name>Gazebo/Orange</name>
             <uri>file://media/materials/scripts/gazebo.material</uri>
           </script>
         </material>

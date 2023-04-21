@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 if __name__ == '__main__':
-    bag_file = "base_link.bag"
+    bag_file = "base_link_success.bag"
     
     # Define the topic names for the link positions
     # topic_names = ['/boat/base_link', '/p450_monocular/base_link']
@@ -66,11 +66,14 @@ if __name__ == '__main__':
 
     # Set the legend and axis labels
     ax.legend()
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    
-    plt.legend()
+    ax.set_xlabel('X', fontsize=14)
+    ax.set_ylabel('Y', fontsize=14)
+    ax.set_zlabel('Z', fontsize=14)
+    ax.tick_params(axis='x', labelsize=14)
+    ax.tick_params(axis='y', labelsize=14)
+    ax.tick_params(axis='z', labelsize=14)
+
+    plt.legend(fontsize=14)
     # Show the plot
     plt.show()
 

@@ -7,7 +7,7 @@ import numpy as np
 START = 0
 start_plot_time = 75
 if __name__ == '__main__':
-    bag_file = "base_link.bag"
+    bag_file = "base_link_success.bag"
 
     bag = rosbag.Bag(bag_file)
 
@@ -50,11 +50,13 @@ if __name__ == '__main__':
     plt.plot(time_data_usv, z_drone, label='height of the UAV')
 
 
-    plt.xlabel('Time (s)')
-    plt.ylabel('Z-axis coordinate')
+    plt.xlabel('Time (s)',fontsize=14)
+    plt.ylabel('Z-axis coordinate',fontsize=14)
     # plt.title('Link Z-axis coordinate over time')
     
-    plt.legend()
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
+    plt.legend(fontsize=14)
     # Show the plot
     plt.show()
 

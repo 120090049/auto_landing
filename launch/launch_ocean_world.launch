@@ -2,8 +2,8 @@
 	<!-- Launch Gazebo Simulation -->
 	<!-- the location of the USV -->
 
-	<arg name="x" default="30"/>
-    <arg name="y" default="15"/>
+	<arg name="x" default="10"/>
+    <arg name="y" default="5"/>
     <arg name="z" default="6.1"/>
 	<arg name="R" default="0"/>
     <arg name="P" default="0"/>
