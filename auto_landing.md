@@ -7,7 +7,6 @@ Currently, I have realized the landing of UAV on a shaking USV platform. The res
 
 ![0system.jpg](https://github.com/120090049/auto_landing/blob/master/pic/0system.jpg)
 
----
 
 # Installation
 
@@ -42,7 +41,7 @@ In my code, **px4_controller.py** and **px4_controller_withcamera.py** work as a
 Please refer to [QGC](https://blog.csdn.net/Legendyyy/article/details/127177714?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522166971163916800180668420%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&request_id=166971163916800180668420&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-2-127177714-null-null.142%5Ev67%5Econtrol,201%5Ev3%5Eadd_ask,213%5Ev2%5Et3_control1&utm_term=ubuntu18.04%E5%AE%89%E8%A3%85qgc%E5%9C%B0%E9%9D%A2%E7%AB%99&spm=1018.2226.3001.4187)
 
 - Setting channels for the remote controller, (please make sure your UAV is launched in the gazebo)
-enter into vehicle setup -> parameters -> search and set as following
+enter into vehicle setup => parameters => search and set as following
 
 
 ![image.png](https://github.com/120090049/auto_landing/blob/master/pic/image.png)
@@ -81,7 +80,6 @@ Take off the UAV, you can find the UAV is shaking violently. So open the QGC, ch
 
 # Function presentation
 
----
 
 After setting all of these, we can happily run the code!
 
@@ -135,18 +133,15 @@ In the **./ocean_experiment.sh**, we will
 
 - **record_link.py** to record trajectory for later analysis
 
+
 # A Future plan
-
----
-
-My academic advisor Prof. Qian has suggested me to study the usage of UVA for the inspection of offshore turbines, which is a development trend of new energy in the near future. I plan to work on this direction in the future, say, when I am a senior.
-Here is a rough environment I created.
-
-```Plain Text
+My academic advisor Prof. Qian has suggested me to study the usage of UVA for the inspection of offshore turbines, which is a development trend of new energy in the near future. I plan to work on this direction in the future, say, when I am a senior.  
+Here is a rough environment I created.   
+![](https://github.com/120090049/auto_landing/blob/master/pic/windturbines.jpg)
+The turbine is designed and exported from solidworks.  
+To launch the environment and control the turbine, you may run
+```
 roslaunch auto_landing launch_my_wind_motor_world.launch
 rosrun auto_landing wind_motor_controller.py
 ```
-
-The turbine is designed and exported from solidworks.
-To launch the environment and control the turbine, you may run
 
