@@ -60,7 +60,7 @@ enter into vehicle setup => parameters => search and set as following
  channel_1: roll; channel_2: throttle; channel_3: pitch; channel_4: yaw; channel_5: flight mode;
 ```
 
-### config PID parameters
+### Config PID parameters
 
 set up simulation world
 
@@ -104,7 +104,6 @@ rosrun auto_landing pad_car_controller.py
 
 - Demo output (tracing a circle)
 ![](https://github.com/120090049/auto_landing/blob/master/pic/circlegif.gif)
-or you can see the video in [https://www.bilibili.com/video/BV1i841157xP/?spm_id_from=333.999.0.0&vd_source=ad381b5f9f387834b8c7d8816afa9ed5](bilibili)
 
 ## Landing in ocean environment
 
@@ -124,7 +123,7 @@ In the **./ocean_experiment.sh**, we will
 
 - launch the simulation world, PX4, mavros 
 
-- **px4_controller_withcamera.py f**or UAV remote control (switch UAV to offboard mode after take off)
+- **px4_controller_withcamera.py** for UAV remote control (switch UAV to offboard mode after take off)
 
 - **landpad_det** for down-looking camera, 
 
@@ -133,6 +132,9 @@ In the **./ocean_experiment.sh**, we will
 - **launch_ocean_mission.launch** for control loop
 
 - **record_link.py** to record trajectory for later analysis
+
+- Demo output
+![](https://github.com/120090049/auto_landing/blob/master/pic/ocean_landing.gif)
 
 
 # A Future plan
