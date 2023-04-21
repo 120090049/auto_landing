@@ -123,17 +123,17 @@ In the **./ocean_experiment.sh**, we will
 
 - launch the simulation world, PX4, mavros 
 
-- **px4_controller_withcamera.py** for UAV remote control (switch UAV to offboard mode after take off)
+- **px4_controller_withcamera.py** for UAV remote control (switch UAV to offboard mode after taking off)
 
 - **landpad_det** for down-looking camera, 
 
-- **detect_with_front_camera.py** for front-looing camera
+- **detect_with_front_camera.py** for front-looking camera
 
 - **launch_ocean_mission.launch** for control loop
 
 - **record_link.py** to record trajectory for later analysis
 
-- Demo output
+Demo output
 ![](https://github.com/120090049/auto_landing/blob/master/pic/ocean_landing.gif)
 
 
