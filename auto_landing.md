@@ -1,20 +1,17 @@
 # Project Overview
 
----
 
-**auto_landing** is a ros package for UAV tracking and landing job in a simulated ocean environment. I hope this project can provide ****simulation ****assistance for the research of collaborative mission of unmanned aerial vehicle (**UAV**)  and unmanned surface vehicle (**USV**) in our college's lab (CUHKSZ AIRS).
+**auto_landing** is a ros package for UAV tracking and landing job in a simulated ocean environment. I hope this project can provide simulation assistance for the research of collaborative mission of unmanned aerial vehicle (**UAV**)  and unmanned surface vehicle (**USV**) in our college's lab (CUHKSZ AIRS).
 
 Currently, I have realized the landing of UAV on a shaking USV platform. The results can be seen from this [video](https://drive.google.com/file/d/1Du2hd4LyCqpviYpElHeEIIWHoj1bF2gY/view?usp=sharing). The whole work has been summarized in to a paper.
 
-![0system.jpg](auto_landing+60994b14-9d30-4bb8-8c81-5bcd51f6f9a9/0system.jpg)
+![0system.jpg](https://github.com/120090049/auto_landing/blob/master/pic/0system.jpg)
+
+---
 
 # Installation
 
----
-
 ## Environment prerequisite
-
----
 
 Our UAV is based on Pixhawk V4 flight control architecture and utilizes **PX4 Drone Autopilot** (**PX4)** flight control firmware. High-level UAV control is developed under the Robot Operating System (ROS). **MAVROS** provides a communication interface between the ROS nodes and PX4, through which ROS nodes can send commands such as waypoint navigation and speed instructions. 
 
@@ -23,8 +20,6 @@ The simulation environment is in Gazebo. It is developed based on **Virtual Robo
 Please refer to [environment_setup](https://github.com/120090049/auto_landing/wiki) to setup PX4, mavros and VRX.
 
 ## Install auto_landing package
-
----
 
 After then, cd to your work space.
 
@@ -38,7 +33,6 @@ or add it to the ~/.bashrc
 
 ## Some configurations before running
 
----
 
 ### Configuration for remote controller
 
@@ -51,14 +45,10 @@ Please refer to [QGC](https://blog.csdn.net/Legendyyy/article/details/127177714?
 enter into vehicle setup -> parameters -> search and set as following
 
 
+![image.png](https://github.com/120090049/auto_landing/blob/master/pic/image.png)
 
 
-
-![image.png](auto_landing+60994b14-9d30-4bb8-8c81-5bcd51f6f9a9/image.png)
-
-
-
-![image.png](auto_landing+60994b14-9d30-4bb8-8c81-5bcd51f6f9a9/image 1.png)
+![image.png](https://github.com/120090049/auto_landing/blob/master/pic/image%201.png)
 
 ```Plain Text
  COM_FLTMODE1 = Position
@@ -87,7 +77,7 @@ rosrun auto_landing px4_controller.py
 
 Take off the UAV, you can find the UAV is shaking violently. So open the QGC, choose vehicle setup => PID tuning => rate_controller. Disable "autotune", then, tune the UAV in roll/pitch/yaw channel.
 
-![image.png](auto_landing+60994b14-9d30-4bb8-8c81-5bcd51f6f9a9/image 2.png)
+![image.png](https://github.com/120090049/auto_landing/blob/master/pic/image%202.png)
 
 # Function presentation
 
@@ -115,8 +105,8 @@ rosrun auto_landing pad_car_controller.py
 ```
 
 - Demo output (tracing a circle)
-
-or you can see the video in [https://www.bilibili.com/video/BV1i841157xP/?spm_id_from=333.999.0.0&vd_source=ad381b5f9f387834b8c7d8816afa9ed5](https://github.com/120090049/auto_landing/blob/master/bilibili)
+![](https://github.com/120090049/auto_landing/blob/master/pic/circlegif.gif)
+or you can see the video in [https://www.bilibili.com/video/BV1i841157xP/?spm_id_from=333.999.0.0&vd_source=ad381b5f9f387834b8c7d8816afa9ed5](bilibili)
 
 ## Landing in ocean environment
 
