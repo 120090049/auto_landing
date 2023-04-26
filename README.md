@@ -3,7 +3,7 @@
 
 **auto_landing** is a ros package for UAV tracking and landing job in a simulated ocean environment. I hope this project can provide simulation assistance for the research of collaborative mission of unmanned aerial vehicle (**UAV**)  and unmanned surface vehicle (**USV**) in our college's lab (CUHKSZ AIRS).
 
-Currently, I have realized the landing of UAV on a shaking USV platform. The results can be seen from this [video](https://drive.google.com/file/d/1Du2hd4LyCqpviYpElHeEIIWHoj1bF2gY/view?usp=sharing). The whole work has been summarized in to a paper.
+Currently, I have realized the landing of UAV on a shaking USV platform. The results can be seen from this [video](https://drive.google.com/file/d/1Du2hd4LyCqpviYpElHeEIIWHoj1bF2gY/view?usp=sharing). The whole work has been summarized in to a paper (which will be published in IEEE RCAR this summer).
 
 ![0system.jpg](https://github.com/120090049/auto_landing/blob/master/pic/0system.jpg)
 
