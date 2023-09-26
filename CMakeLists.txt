@@ -41,7 +41,7 @@ find_package(Boost REQUIRED COMPONENTS
     date_time
 )
 # 使用OpenCV库
-find_package(OpenCV REQUIRED)
+find_package(OpenCV 3 REQUIRED)
 
 ################################################################################
 
